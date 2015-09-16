@@ -370,6 +370,38 @@ again:
 	return index;
 }
 
+#ifdef CONFIG_LATE_ATTACH_DMA_POOL
+
+/* size is rounded up to the next "order" (log base 2)
+ * allocations are made to be aligned to the order also
+ */
+void *alloc_mem(unsigned long len, unsigned long align)
+{
+	unsigned long mask;
+	unsigned long pageno;
+	int count;
+	unsigned int order;
+
+	if (len < PAGE_SIZE)
+		order = 0;
+	else
+		order = __ilog2((len) - 1) - PAGE_SHIFT + 1;
+	count = (1 << order);
+	mask = (1 << order) - 1;
+	pageno = bitmap_find_next_zero_area(mem_bitmap, mem_count, 0, count,
+					    mask);
+	debug("alloc_mem: count %d mask %#lx pageno %#lx\n", count, mask,
+	      pageno);
+
+	if (pageno >= mem_count)
+		return NULL;
+
+	bitmap_set(mem_bitmap, pageno, count);
+	return (void *)(mem_base + (pageno << PAGE_SHIFT));
+}
+
+#else
+
 void *alloc_mem(unsigned long len, unsigned long align)
 {
 	unsigned long mask;
@@ -393,6 +425,8 @@ void *alloc_mem(unsigned long len, unsigned long align)
 	bitmap_set(mem_bitmap, pageno, count);
 	return (void *)(mem_base + (pageno << PAGE_SHIFT));
 }
+
+#endif
 
 int find_pagesz(unsigned int virt, unsigned int phys, unsigned int len)
 {
