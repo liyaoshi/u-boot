@@ -43,6 +43,19 @@ config LATE_ATTACH_GPT_PART
 	  on eMMC for storing the binaries. Enable this option to read remotecore
 	  binaries from GPT partitions.
 
+
+config LATE_ATTACH_DMA_POOL
+	bool "Enable using a DMA pool instead of a CMA pool"
+	depends on LATE_ATTACH
+	default n
+	help
+	  It may be desireable to define the reserved memory as no-map rather
+	  than as reusable in order to prevent access by other kernel modules to
+	  the memory before the remoteproc driver has a chance to allocate from
+	  the CMA pool and reclaim the memory. In this way the memory is reserved
+	  explicitly for the remote core and kernel cannot allocate from it even
+	  when not in use by remoteproc.
+
 endmenu
 
 source "board/ti/common/Kconfig"
