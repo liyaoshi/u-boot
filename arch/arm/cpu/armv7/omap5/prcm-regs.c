@@ -396,6 +396,7 @@ struct omap_sys_ctrl_regs const dra7xx_ctrl = {
 	.control_core_mmr_lock5			= 0x4A002550,
 	.control_core_control_io1		= 0x4A002554,
 	.control_core_control_io2		= 0x4A002558,
+	.control_core_bootstrap			= 0x4A0026C4,
 	.control_paconf_global			= 0x4A002DA0,
 	.control_paconf_mode			= 0x4A002DA4,
 	.control_smart1io_padconf_0		= 0x4A002DA8,

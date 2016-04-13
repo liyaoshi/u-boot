@@ -284,6 +284,23 @@ u32 get_device_type(void)
 				      (DEVICE_TYPE_MASK)) >> DEVICE_TYPE_SHIFT;
 }
 
+/*
+ * get_sysboot_value(void) - return SYS_BOOT[5:0]
+ */
+u32 get_sysboot_value(void)
+{
+	u32 sys_boot = 0;
+
+	if (is_dra7xx())
+		sys_boot = readl((*ctrl)->control_core_bootstrap) &
+			(SYSBOOT_MASK);
+	else
+		sys_boot = readl((*ctrl)->control_status) &
+			(SYSBOOT_MASK);
+
+	return sys_boot;
+}
+
 #if defined(CONFIG_DISPLAY_CPUINFO)
 /*
  * Print CPU information

@@ -37,6 +37,8 @@ struct gptimer {
 #endif /* __ASSEMBLY__ */
 #endif /* __KERNEL_STRICT_NAMES */
 
+#define SYSBOOT_MASK		0xFF
+
 /* enable sys_clk NO-prescale /1 */
 #define GPT_EN			((0x0 << 2) | (0x1 << 1) | (0x1 << 0))
 
