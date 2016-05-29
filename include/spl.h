@@ -158,4 +158,7 @@ bool spl_was_boot_source(void);
  * @return 0 on success, otherwise error code
  */
 int spl_dfu_cmd(int usbctrl, char *dfu_alt_info, char *interface, char *devstr);
+
+u32 spl_mmc_load_core(u32 core_id, u32 boot_device);
+u32 spl_boot_core(u32 core_id);
 #endif

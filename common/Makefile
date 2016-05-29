@@ -166,3 +166,5 @@ obj-y += s_record.o
 obj-y += xyzModem.o
 
 CFLAGS_env_embedded.o := -Wa,--no-warn -DENV_CRC=$(shell tools/envcrc 2>/dev/null)
+
+obj-$(CONFIG_LATE_ATTACH) += elf_remoteproc.o

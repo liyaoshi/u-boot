@@ -6,3 +6,5 @@
 #
 
 obj-y	:= evm.o
+
+obj-$(CONFIG_LATE_ATTACH) += lateattach.o

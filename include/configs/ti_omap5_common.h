@@ -236,4 +236,33 @@
 #undef CONFIG_DM_ETH
 #endif
 
+#define MAX_REMOTECORE_BIN_SIZE (8*0x100000)
+
+/* Define the address to which the IPU1 binary is
+ * loaded from persistent storage
+ */
+#define IPU1_LOAD_ADDR		(0xa0fff000)
+
+/*
+ * Set load address  for each core 8 MB after load
+ * address for the previous core
+ */
+#define IPU2_LOAD_ADDR		(IPU1_LOAD_ADDR+MAX_REMOTECORE_BIN_SIZE)
+#define DSP1_LOAD_ADDR		(IPU2_LOAD_ADDR+MAX_REMOTECORE_BIN_SIZE)
+#define DSP2_LOAD_ADDR		(DSP1_LOAD_ADDR+MAX_REMOTECORE_BIN_SIZE)
+
+/* Define the GPT partition names only when they are used.
+ * This prevents warnings of invalid GPT table when loading
+ * binaries from FAT partition.
+ */
+#ifdef CONFIG_LATE_ATTACH_GPT_PART
+#define CONFIG_MMC_IPU1_PART_NAME "ipu1"
+#define CONFIG_MMC_IPU2_PART_NAME "ipu2"
+#define CONFIG_MMC_DSP1_PART_NAME "dsp1"
+#define CONFIG_MMC_DSP2_PART_NAME "dsp2"
+#endif
+
+/* Error code to indicate that SPL failed to load a remotecore */
+#define SPL_CORE_LOAD_ERR_ID (0xFF00)
+
 #endif /* __CONFIG_TI_OMAP5_COMMON_H */

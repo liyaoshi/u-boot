@@ -18,6 +18,7 @@
 #include <malloc.h>
 #include <dm/root.h>
 #include <linux/compiler.h>
+#include <omap_remoteproc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -201,6 +202,38 @@ static int spl_ram_load_image(void)
 }
 #endif
 
+#ifdef CONFIG_LATE_ATTACH
+
+/*
+ * Loads the remotecores specified in the cores array.
+ *
+ * In case of failure, the core id array is OR'ed with an error code
+ * to indicate that the load has failed.
+ *
+ * This information can be used to indicate status of the remotecore
+ * load to the kernel.
+ */
+void spl_load_cores(u32 boot_device, u32 *cores, u32 numcores)
+{
+	u32 i = 0;
+
+	for (i = 0; i < numcores ; i++) {
+		u32 core = cores[i];
+		if (spl_mmc_load_core(core, boot_device) ||
+		    spl_boot_core(core)) {
+			cores[i] = (cores[i] | SPL_CORE_LOAD_ERR_ID);
+			printf("Error loading remotecore %s!,"
+				 "Continuing with boot ...\n",
+				 rproc_cfg_arr[core]->core_name);
+		} else {
+			debug("loading remote core %s successful\n",
+			      rproc_cfg_arr[core]->core_name);
+		}
+	}
+	return;
+}
+#endif
+
 int spl_init(void)
 {
 	int ret;
@@ -327,6 +360,15 @@ static void announce_boot_device(u32 boot_device)
 static inline void announce_boot_device(u32 boot_device) { }
 #endif
 
+#ifdef CONFIG_LATE_ATTACH
+/* List the id of the remotecores that need to be earlybooted
+ *  in this array. This array is global as the success/failure
+ * of the early load operation is specified by updating this
+ * array.
+ */
+u32 cores_to_boot[] = { IPU2, DSP1, DSP2, IPU1 };
+#endif
+
 static int spl_load_image(u32 boot_device)
 {
 	switch (boot_device) {
@@ -338,6 +380,10 @@ static int spl_load_image(u32 boot_device)
 	case BOOT_DEVICE_MMC1:
 	case BOOT_DEVICE_MMC2:
 	case BOOT_DEVICE_MMC2_2:
+#ifdef CONFIG_LATE_ATTACH
+		spl_load_cores(boot_device, cores_to_boot,
+			       sizeof(cores_to_boot)/sizeof(u32));
+#endif
 		return spl_mmc_load_image(boot_device);
 #endif
 #ifdef CONFIG_SPL_NAND_SUPPORT
@@ -358,6 +404,10 @@ static int spl_load_image(u32 boot_device)
 #endif
 #ifdef CONFIG_SPL_SPI_SUPPORT
 	case BOOT_DEVICE_SPI:
+#ifdef CONFIG_LATE_ATTACH
+                spl_load_cores(boot_device, cores_to_boot,
+                               sizeof(cores_to_boot)/sizeof(u32));
+#endif
 		return spl_spi_load_image();
 #endif
 #ifdef CONFIG_SPL_ETH_SUPPORT

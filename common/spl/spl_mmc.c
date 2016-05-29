@@ -18,6 +18,8 @@
 #ifdef CONFIG_SPL_ANDROID_BOOT_SUPPORT
 #include <fdt_support.h>
 #endif
+#include <fat.h>
+#include <omap_remoteproc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -529,4 +531,58 @@ int spl_mmc_load_image(u32 boot_device)
 	}
 
 	return err;
+}
+
+u32 spl_mmc_load_core(u32 core_id, u32 boot_device)
+{
+	struct rproc *cfg = NULL;
+	s32 err = 0;
+	struct mmc *mmc;
+
+	if ((core_id == 0) || (core_id >= RPROC_END_ENUMS)) {
+		printf("Invalid core id speicified: %d\n", core_id);
+		return 1;
+	}
+
+	cfg = rproc_cfg_arr[core_id];
+
+	debug("spl: loading remote core image %s\n", cfg->firmware_name);
+
+	spl_mmc_init(&mmc, boot_device);
+
+	/* load the remote core image from partition */
+	if (cfg->ptn) {
+		disk_partition_t info;
+
+		err = part_get_info_efi_by_name(&mmc->block_dev,
+						     cfg->ptn, &info);
+		if (err) {
+#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
+			printf("cannot find partition: '%s'\n",
+			       cfg->ptn);
+#endif
+		} else if (!mmc->block_dev.block_read(&mmc->block_dev,
+						      info.start,
+						      info.size,
+						      (void *)cfg->load_addr)) {
+			printf("error reading from mmc\n");
+			err = -1;
+		} else {
+			err = 1;
+		}
+	} else {
+		/* load the remotecore image */
+		err = spl_load_file_fat(&mmc->block_dev,
+					CONFIG_SYS_MMCSD_FS_BOOT_PARTITION,
+					cfg->firmware_name,
+					(u8 *)cfg->load_addr);
+	}
+
+	if (err <= 0) {
+		printf("spl: error reading image %s, err - %d\n",
+		       cfg->firmware_name, err);
+		return 1;
+	}
+
+	return 0;
 }
