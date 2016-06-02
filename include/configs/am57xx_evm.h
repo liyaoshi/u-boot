@@ -27,7 +27,7 @@
 #define CONFIG_SYS_MMC_ENV_DEV		1	/* eMMC */
 #define CONFIG_SYS_MMC_ENV_PART		0
 #define CONFIG_ENV_SIZE			SZ_128K
-#define CONFIG_ENV_OFFSET		0xe0000	/* "reserved" partition */
+#define CONFIG_ENV_OFFSET		0x140000	/* "reserved" part. */
 #define CONFIG_ENV_OFFSET_REDUND	(CONFIG_ENV_OFFSET + CONFIG_ENV_SIZE)
 #define CONFIG_SYS_REDUNDAND_ENVIRONMENT
 
@@ -49,7 +49,7 @@
 	"partitions_android=" \
 	"uuid_disk=${uuid_gpt_disk};" \
 	"name=xloader,start=128K,size=128K,uuid=${uuid_gpt_xloader};" \
-	"name=bootloader,size=384K,uuid=${uuid_gpt_bootloader};" \
+	"name=bootloader,size=768K,uuid=${uuid_gpt_bootloader};" \
 	"name=environment,size=128K,uuid=${uuid_gpt_environment};" \
 	"name=misc,size=128K,uuid=${uuid_gpt_misc};" \
 	"name=reserved,size=384K,uuid=${uuid_gpt_reserved};" \
