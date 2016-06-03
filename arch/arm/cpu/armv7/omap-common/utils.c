@@ -7,15 +7,6 @@
 #include <common.h>
 #include <asm/arch/sys_proto.h>
 
-/* Device type bits in CONTROL_STATUS register */
-#define DEVICETYPE_OFFSET	6
-#define DEVICETYPE_MASK		(0x7 << DEVICETYPE_OFFSET)
-#define OMAP_TYPE_TEST		0x0
-#define OMAP_TYPE_EMU		0x1
-#define OMAP_TYPE_SEC		0x2
-#define OMAP_TYPE_GP		0x3
-#define OMAP_TYPE_BAD		0x4
-
 static void do_cancel_out(u32 *num, u32 *den, u32 factor)
 {
 	while (1) {
@@ -124,18 +115,12 @@ void omap_die_id_display(void)
 
 static const char *get_cpu_type(void)
 {
-	unsigned int value;
-
-	value = readl((*ctrl)->control_status);
-	value &= DEVICETYPE_MASK;
-	value >>= DEVICETYPE_OFFSET;
-
-	switch (value) {
-	case OMAP_TYPE_EMU:
+	switch (get_device_type()) {
+	case EMU_DEVICE:
 		return "EMU";
-	case OMAP_TYPE_SEC:
+	case HS_DEVICE:
 		return "HS";
-	case OMAP_TYPE_GP:
+	case GP_DEVICE:
 		return "GP";
 	default:
 		return NULL;
