@@ -40,6 +40,7 @@
 #define TX_ENDPOINT_MAXIMUM_PACKET_SIZE      (0x0040)
 
 #define EP_BUFFER_SIZE			4096
+#define MAX_CMDS 			4
 /*
  * EP_BUFFER_SIZE must always be an integral multiple of maxpacket size
  * (64 or 512 or 1024), else we break on certain controllers like DWC3
@@ -63,6 +64,7 @@ static struct f_fastboot *fastboot_func;
 static unsigned int fastboot_flash_session_id;
 static unsigned int download_size;
 static unsigned int download_bytes;
+static char f_cmdbuf[MAX_CMDS][32];
 
 static struct usb_endpoint_descriptor fs_ep_in = {
 	.bLength            = USB_DT_ENDPOINT_SIZE,
@@ -396,6 +398,30 @@ static int strcmp_l1(const char *s1, const char *s2)
 	if (!s1 || !s2)
 		return -1;
 	return strncmp(s1, s2, strlen(s1));
+}
+
+static void reset_fastboot_cmd(void)
+{
+	int i;
+	for (i = 0; i < MAX_CMDS; ++i)
+		f_cmdbuf[i][0] = 0;
+}
+
+static void run_fastboot_cmd(void)
+{
+	int i;
+	for (i = 0; f_cmdbuf[i][0] && i < MAX_CMDS; ++i) {
+		if (run_command(f_cmdbuf[i], 0))
+			fastboot_tx_write_str("FAIL");
+		else
+			fastboot_tx_write_str("OKAY");
+	}
+}
+
+static void add_fastboot_cmd(int index, char *str)
+{
+	if (index < MAX_CMDS)
+		strcpy(f_cmdbuf[index], str);
 }
 
 static void cb_getvar(struct usb_ep *ep, struct usb_request *req)
@@ -770,23 +796,26 @@ static void cb_flash(struct usb_ep *ep, struct usb_request *req)
 static void cb_oem(struct usb_ep *ep, struct usb_request *req)
 {
 	char *cmd = req->buf;
+	char cmdbuf[32];
+
+	reset_fastboot_cmd();
+
 #ifdef CONFIG_FASTBOOT_FLASH_MMC_DEV
 	if (strncmp("format", cmd + 4, 6) == 0) {
-		char cmdbuf[32];
                 sprintf(cmdbuf, "gpt write mmc %x $partitions",
 			CONFIG_FASTBOOT_FLASH_MMC_DEV);
-                if (run_command(cmdbuf, 0))
-			fastboot_tx_write_str("FAIL");
-                else
-			fastboot_tx_write_str("OKAY");
+		add_fastboot_cmd(0, cmdbuf);
 	} else
 #endif
 	if (strncmp("unlock", cmd + 4, 8) == 0) {
 		fastboot_tx_write_str("FAILnot implemented");
-	}
-	else {
+		return ;
+	} else {
 		fastboot_tx_write_str("FAILunknown oem command");
+		return ;
 	}
+
+	run_fastboot_cmd();
 }
 
 #ifdef CONFIG_FASTBOOT_FLASH
