@@ -615,6 +615,29 @@ static void cb_continue(struct usb_ep *ep, struct usb_request *req)
 #ifdef CONFIG_FASTBOOT_FLASH
 static int fastboot_update_zimage(void);
 
+static void fastboot_update_bootloader(char *cmd)
+{
+	char cmdbuf[32];
+	reset_fastboot_cmd();
+
+	if (strncmp("xloader", cmd, 7) == 0) {
+		sprintf(cmdbuf, "sf write 0x%x 0 40000",
+			(unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
+		add_fastboot_cmd(0, cmdbuf);
+		sprintf(cmdbuf, "sf update 0x%x 0 40000",
+			(unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
+		add_fastboot_cmd(1, cmdbuf);
+	} else if (strncmp("bootloader", cmd, 10) == 0) {
+		sprintf(cmdbuf, "sf write 0x%x 40000 80000",
+			(unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
+		add_fastboot_cmd(0, cmdbuf);
+		sprintf(cmdbuf, "sf update 0x%x 40000 80000",
+			(unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
+		add_fastboot_cmd(1, cmdbuf);
+	}
+	run_fastboot_cmd();
+}
+
 static u32 fastboot_get_boot_ptn(struct andr_img_hdr *hdr, char *response,
 						struct blk_desc *dev_desc)
 {
@@ -776,6 +799,11 @@ static void cb_flash(struct usb_ep *ep, struct usb_request *req)
 	if (!strcmp(cmd, "zImage") || !strcmp(cmd, "zimage")) {
 		fastboot_update_zimage();
 		return;
+	}
+
+	if (!strcmp(cmd, "xloader") || !strcmp(cmd, "bootloader")) {
+		fastboot_update_bootloader(cmd);
+		return ;
 	}
 
 #ifdef CONFIG_FASTBOOT_FLASH_MMC_DEV
