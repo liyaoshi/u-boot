@@ -807,7 +807,11 @@ static void cb_oem(struct usb_ep *ep, struct usb_request *req)
 		add_fastboot_cmd(0, cmdbuf);
 	} else
 #endif
-	if (strncmp("unlock", cmd + 4, 8) == 0) {
+	if (strncmp("spi", cmd + 4, 3) == 0) {
+		add_fastboot_cmd(0, "sf probe 0");
+		add_fastboot_cmd(1, "sf erase 0 0x40000");
+		add_fastboot_cmd(2, "sf erase 0x40000 0x80000");
+	} else if (strncmp("unlock", cmd + 4, 8) == 0) {
 		fastboot_tx_write_str("FAILnot implemented");
 		return ;
 	} else {
