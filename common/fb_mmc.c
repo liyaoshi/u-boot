@@ -141,6 +141,7 @@ void fb_mmc_flash_write(const char *cmd, unsigned int session_id,
 	if (is_sparse_image(download_buffer)) {
 		struct fb_mmc_sparse sparse_priv;
 		sparse_storage_t sparse;
+		int ret;
 
 		sparse_priv.dev_desc = dev_desc;
 
@@ -153,8 +154,15 @@ void fb_mmc_flash_write(const char *cmd, unsigned int session_id,
 		printf("Flashing sparse image at offset " LBAFU "\n",
 		       info.start);
 
-		store_sparse_image(&sparse, &sparse_priv, session_id,
+		ret = store_sparse_image(&sparse, &sparse_priv, session_id,
 				   download_buffer);
+		if (ret) {
+			printf("%s: writing sparse image failed: %d\n",
+					__func__, ret);
+			fastboot_fail(response_str,
+					"writing sparse image failed");
+			return;
+		}
 	} else {
 		write_raw_image(dev_desc, &info, cmd, download_buffer,
 				download_bytes);
