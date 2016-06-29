@@ -64,6 +64,11 @@ __weak void spl_board_prepare_for_linux(void)
 	/* Nothing to do! */
 }
 
+__weak void spl_board_prepare_for_boot(void)
+{
+	/* Nothing to do! */
+}
+
 void spl_set_header_raw_uboot(void)
 {
 	spl_image.size = CONFIG_SYS_MONITOR_LEN;
@@ -340,11 +345,47 @@ static int spl_load_image(u32 boot_device)
 	return -EINVAL;
 }
 
+#if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
+		defined(CONFIG_ARM)
+static int reserve_mmu(void)
+{
+	phys_addr_t ram_top = 0;
+	/* reserve TLB table */
+	gd->arch.tlb_size = PGTABLE_SIZE;
+
+#ifdef CONFIG_SYS_SDRAM_BASE
+	ram_top = CONFIG_SYS_SDRAM_BASE;
+#endif
+	ram_top += get_effective_memsize();
+	gd->arch.tlb_addr = ram_top - gd->arch.tlb_size;
+	debug("TLB table from %08lx to %08lx\n", gd->arch.tlb_addr,
+	      gd->arch.tlb_addr + gd->arch.tlb_size);
+	return 0;
+}
+
+__weak void dram_init_banksize(void)
+{
+#if defined(CONFIG_NR_DRAM_BANKS) && defined(CONFIG_SYS_SDRAM_BASE)
+	gd->bd->bi_dram[0].start = CONFIG_SYS_SDRAM_BASE;
+	gd->bd->bi_dram[0].size = get_effective_memsize();
+#endif
+}
+
+#endif
+
 void board_init_r(gd_t *dummy1, ulong dummy2)
 {
 	int i;
 
 	debug(">>spl:board_init_r()\n");
+	gd->bd = &bdata;
+
+#if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
+		defined(CONFIG_ARM)
+	dram_init_banksize();
+	reserve_mmu();
+	enable_caches();
+#endif
 
 #if defined(CONFIG_SYS_SPL_MALLOC_START)
 	mem_malloc_init(CONFIG_SYS_SPL_MALLOC_START,
@@ -381,6 +422,11 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		hang();
 	}
 
+#if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
+		defined(CONFIG_ARM)
+	cleanup_before_linux();
+#endif
+
 	switch (spl_image.os) {
 	case IH_OS_U_BOOT:
 		debug("Jumping to U-Boot\n");
@@ -400,6 +446,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 #endif
 
 	debug("loaded - jumping to U-Boot...");
+	spl_board_prepare_for_boot();
 	jump_to_image_no_args(&spl_image);
 }
 
@@ -409,7 +456,6 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
  */
 void preloader_console_init(void)
 {
-	gd->bd = &bdata;
 	gd->baudrate = CONFIG_BAUDRATE;
 
 	serial_init();		/* serial communications setup */
