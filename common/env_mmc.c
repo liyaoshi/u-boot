@@ -223,7 +223,7 @@ void env_relocate_spec(void)
 	ALLOC_CACHE_ALIGN_BUFFER(env_t, tmp_env1, 1);
 	ALLOC_CACHE_ALIGN_BUFFER(env_t, tmp_env2, 1);
 
-#ifdef CONFIG_SPL_BUILD
+#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_SPL_ENV_SUPPORT)
 	dev = 0;
 #endif
 

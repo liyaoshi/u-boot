@@ -1151,6 +1151,7 @@ int android_image_get_ramdisk(const struct andr_img_hdr *hdr,
 			      ulong *rd_data, ulong *rd_len);
 ulong android_image_get_end(const struct andr_img_hdr *hdr);
 ulong android_image_get_kload(const struct andr_img_hdr *hdr);
+ulong android_image_get_rload(const struct andr_img_hdr *hdr);
 
 #endif /* CONFIG_ANDROID_BOOT_IMAGE */
 

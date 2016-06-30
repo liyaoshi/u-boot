@@ -105,6 +105,21 @@ void spl_parse_image_header(const struct image_header *header)
 		debug("spl: payload image: %.*s load addr: 0x%x size: %d\n",
 			(int)sizeof(spl_image.name), spl_image.name,
 			spl_image.load_addr, spl_image.size);
+#ifdef CONFIG_SPL_ANDROID_BOOT_SUPPORT
+	} else if (genimg_get_format(header) == IMAGE_FORMAT_ANDROID) {
+		ulong kern_start;
+		android_image_get_kernel((const struct andr_img_hdr *)header,
+					 true, &kern_start,
+					 (ulong *)&spl_image.size);
+		spl_image.entry_point = android_image_get_kload((const struct andr_img_hdr *)header);
+		spl_image.load_addr = spl_image.entry_point - (kern_start - (ulong)header);
+		spl_image.size += (kern_start - (ulong)header);
+		spl_image.os = IH_OS_LINUX;
+		spl_image.name = "Android Image";
+		debug("spl: android image: %.*s load addr: 0x%x size: %d\n",
+			sizeof(spl_image.name), spl_image.name,
+			spl_image.load_addr, spl_image.size);
+#endif
 	} else {
 #ifdef CONFIG_SPL_PANIC_ON_RAW_IMAGE
 		/*

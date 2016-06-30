@@ -145,3 +145,8 @@ int android_image_get_ramdisk(const struct andr_img_hdr *hdr,
 	*rd_len = hdr->ramdisk_size;
 	return 0;
 }
+
+ulong android_image_get_rload(const struct andr_img_hdr *hdr)
+{
+	return hdr->ramdisk_addr;
+}

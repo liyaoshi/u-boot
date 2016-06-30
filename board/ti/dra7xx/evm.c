@@ -29,6 +29,7 @@
 #include <ti-usb-phy-uboot.h>
 #include <miiphy.h>
 #include <pcf8575.h>
+#include <spl.h>
 
 #include "mux_data.h"
 #include "../common/board_detect.h"
@@ -393,6 +394,19 @@ struct vcores_data dra722_volts = {
  */
 int board_init(void)
 {
+#ifndef CONFIG_SPL_DFU_SUPPORT
+#ifdef CONFIG_SPL_ENV_SUPPORT
+#ifdef CONFIG_ENV_IS_IN_MMC
+	struct mmc *mmc;
+	spl_mmc_init(&mmc, UINT_MAX);
+#endif
+
+	env_init();
+	env_relocate_spec();
+	omap_die_id_serial();
+#endif
+#endif
+
 	gpmc_init();
 	gd->bd->bi_boot_params = (0x80000000 + 0x100); /* boot param addr */
 

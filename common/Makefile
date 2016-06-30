@@ -112,6 +112,10 @@ obj-$(CONFIG_ENV_IS_IN_NAND) += env_nand.o
 obj-$(CONFIG_ENV_IS_IN_SPI_FLASH) += env_sf.o
 obj-$(CONFIG_ENV_IS_IN_FLASH) += env_flash.o
 endif
+obj-$(CONFIG_SPL_ANDROID_BOOT_SUPPORT) += env_flags.o
+obj-$(CONFIG_SPL_ANDROID_BOOT_SUPPORT) += env_attr.o
+obj-$(CONFIG_SPL_ANDROID_BOOT_SUPPORT) += env_callback.o
+obj-$(CONFIG_SPL_ANDROID_BOOT_SUPPORT) += fdt_support.o
 endif
 #environment
 obj-y += env_common.o
