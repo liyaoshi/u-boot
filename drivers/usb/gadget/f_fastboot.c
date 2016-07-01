@@ -65,6 +65,7 @@ static unsigned int fastboot_flash_session_id;
 static unsigned int download_size;
 static unsigned int download_bytes;
 static char f_cmdbuf[MAX_CMDS][32];
+static int flash_spi;
 
 static struct usb_endpoint_descriptor fs_ep_in = {
 	.bLength            = USB_DT_ENDPOINT_SIZE,
@@ -801,9 +802,11 @@ static void cb_flash(struct usb_ep *ep, struct usb_request *req)
 		return;
 	}
 
-	if (!strcmp(cmd, "xloader") || !strcmp(cmd, "bootloader")) {
-		fastboot_update_bootloader(cmd);
-		return ;
+	if (!strcmp(cmd, "xloader") ||	!strcmp(cmd, "bootloader")) {
+		if (flash_spi) {
+			fastboot_update_bootloader(cmd);
+			return;
+		}
 	}
 
 #ifdef CONFIG_FASTBOOT_FLASH_MMC_DEV
@@ -835,7 +838,11 @@ static void cb_oem(struct usb_ep *ep, struct usb_request *req)
 		add_fastboot_cmd(0, cmdbuf);
 	} else
 #endif
-	if (strncmp("spi", cmd + 4, 3) == 0) {
+	if (strncmp("mmc", cmd + 4, 3) == 0) {
+		flash_spi = 0;
+		fastboot_tx_write_str("OKAY");
+	} else if (strncmp("spi", cmd + 4, 3) == 0) {
+		flash_spi = 1;
 		add_fastboot_cmd(0, "sf probe 0");
 		add_fastboot_cmd(1, "sf erase 0 0x40000");
 		add_fastboot_cmd(2, "sf erase 0x40000 0x80000");
