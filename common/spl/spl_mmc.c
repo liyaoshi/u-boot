@@ -285,10 +285,31 @@ static int mmc_load_image_raw_os(struct mmc *mmc)
 {
 	unsigned long count;
 	int ret;
+	lbaint_t sector, num_sectors;
+#if defined(CONFIG_SPL_MMC_DTB_NAME) || defined(CONFIG_SPL_MMC_KERNEL_NAME)
+	disk_partition_t info;
+#endif
 
-	count = mmc->block_dev.block_read(&mmc->block_dev,
-		CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR,
-		CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS,
+#ifdef CONFIG_SPL_MMC_DTB_NAME
+	ret = part_get_info_efi_by_name(&mmc->block_dev,
+					     CONFIG_SPL_MMC_DTB_NAME,
+					     &info);
+	if (ret) {
+#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
+		printf("cannot find partition: '%s'\n",
+		       CONFIG_SPL_MMC_DTB_NAME);
+#endif
+		return -1;
+	}
+
+	sector = info.start;
+	num_sectors = info.size;
+#else
+	sector = CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR;
+	num_sectors = CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR;
+#endif
+
+	count = mmc->block_dev.block_read(&mmc->block_dev, sector, num_sectors,
 		(void *) CONFIG_SYS_SPL_ARGS_ADDR);
 	if (count == 0) {
 #ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
@@ -297,8 +318,23 @@ static int mmc_load_image_raw_os(struct mmc *mmc)
 		return -1;
 	}
 
-	ret = mmc_load_image_raw_sector(mmc,
-		CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR);
+#ifdef CONFIG_SPL_MMC_KERNEL_NAME
+	ret = part_get_info_efi_by_name(&mmc->block_dev,
+					     CONFIG_SPL_MMC_KERNEL_NAME,
+					     &info);
+	if (ret) {
+#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
+		printf("cannot find partition: '%s'\n",
+		       CONFIG_SPL_MMC_KERNEL_NAME);
+#endif
+		return -1;
+	}
+
+	sector = info.start;
+#else
+	sector = CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR;
+#endif
+	ret = mmc_load_image_raw_sector(mmc, sector);
 	if (ret)
 		return ret;
 
