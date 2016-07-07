@@ -264,24 +264,39 @@ int spl_mmc_do_fs_boot(struct mmc *mmc)
 }
 #endif
 
-int spl_mmc_load_image(u32 boot_device)
+int spl_mmc_init(struct mmc **mmc, u32 boot_device)
 {
-	struct mmc *mmc = NULL;
-	u32 boot_mode;
 	int err = 0;
-	__maybe_unused int part;
 
-	err = spl_mmc_find_device(&mmc, boot_device);
+	if (boot_device == UINT_MAX)
+		boot_device = spl_boot_device();
+
+	err = spl_mmc_find_device(mmc, boot_device);
 	if (err)
 		return err;
 
-	err = mmc_init(mmc);
+	err = mmc_init(*mmc);
 	if (err) {
 #ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
 		printf("spl: mmc init failed with error: %d\n", err);
 #endif
 		return err;
 	}
+
+	return 0;
+}
+
+int spl_mmc_load_image(u32 boot_device)
+{
+	int err = 0;
+	__maybe_unused int part;
+	struct mmc *mmc = NULL;
+	u32 boot_mode;
+
+	(void)boot_device; /* unused */
+	err = spl_mmc_init(&mmc, boot_device);
+	if (err)
+		return err;
 
 	boot_mode = spl_boot_mode();
 	err = -EINVAL;

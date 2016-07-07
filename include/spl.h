@@ -10,6 +10,7 @@
 /* Platform-specific defines */
 #include <linux/compiler.h>
 #include <asm/spl.h>
+#include <mmc.h>
 
 /* Value in r0 indicates we booted from U-Boot */
 #define UBOOT_NOT_LOADED_FROM_SPL	0x13578642
@@ -125,6 +126,8 @@ int spl_load_image_ext_os(struct blk_desc *block_dev, int partition);
  * board_init_f(), and no device tree will be available.
  */
 int spl_init(void);
+
+int spl_mmc_init(struct mmc **mmc, u32 boot_device);
 
 #ifdef CONFIG_SPL_BOARD_INIT
 void spl_board_init(void);
