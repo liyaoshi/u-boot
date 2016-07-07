@@ -154,4 +154,27 @@ int spl_load_image_fat_os(struct blk_desc *block_dev, int partition)
 	return -ENOSYS;
 }
 #endif
+
+int spl_load_file_fat(struct blk_desc *block_dev,
+		      int partition,
+		      const char *filename,
+		      void *buf) {
+	int err;
+
+	err = spl_register_fat_device(block_dev, partition);
+	if (err)
+		return err;
+
+	err = file_fat_read(filename, buf, 0);
+
+	if (err <= 0) {
+#ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
+		printf("%s: error reading file %s, err - %d\n",
+		       __func__, filename, err);
+#endif
+		return -1;
+	}
+
+	return err;
+}
 #endif
