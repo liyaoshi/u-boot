@@ -405,12 +405,19 @@ int spl_mmc_do_fs_boot(struct mmc *mmc)
 }
 #endif
 
+/**
+ * @param boot_device Boot device index or UINT_MAX if unknown
+ */
 int spl_mmc_init(struct mmc **mmc, u32 boot_device)
 {
 	int err = 0;
 
 	if (boot_device == UINT_MAX)
 		boot_device = spl_boot_device();
+
+	/* In case of QSPI boot we need to init eMMC */
+	if (boot_device == BOOT_DEVICE_SPI)
+		boot_device = BOOT_DEVICE_MMC2_2;
 
 	err = spl_mmc_find_device(mmc, boot_device);
 	if (err)
@@ -426,6 +433,17 @@ int spl_mmc_init(struct mmc **mmc, u32 boot_device)
 
 	return 0;
 }
+
+#ifdef CONFIG_SPL_OS_BOOT
+int spl_mmc_load_image_raw_os(void)
+{
+	struct mmc *mmc;
+
+	spl_mmc_init(&mmc, UINT_MAX);
+
+	return mmc_load_image_raw_os(mmc);
+}
+#endif
 
 int spl_mmc_load_image(u32 boot_device)
 {

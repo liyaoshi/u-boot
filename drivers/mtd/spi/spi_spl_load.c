@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <spl.h>
 
-#ifdef CONFIG_SPL_OS_BOOT
+#if defined(CONFIG_SPL_OS_BOOT) && !defined(CONFIG_SPL_QSPI_OS_IN_MMC)
 /*
  * Load the kernel, check for a valid header we can parse, and if found load
  * the kernel and then device tree.
@@ -84,7 +84,13 @@ int spl_spi_load_image(void)
 	header = (struct image_header *)(CONFIG_SYS_TEXT_BASE);
 
 #ifdef CONFIG_SPL_OS_BOOT
-	if (spl_start_uboot() || spi_load_image_os(flash, header))
+	if (spl_start_uboot() ||
+#ifdef CONFIG_SPL_QSPI_OS_IN_MMC
+	    spl_mmc_load_image_raw_os()
+#else
+	    spi_load_image_os(flash, header)
+#endif
+	)
 #endif
 	{
 		/* Load u-boot, mkimage header is 64 bytes. */

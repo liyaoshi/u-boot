@@ -88,6 +88,11 @@ int spl_nor_load_image(void);
 /* MMC SPL functions */
 int spl_mmc_load_image(u32 boot_device);
 
+#ifdef CONFIG_SPL_OS_BOOT
+/* MMC SPL functions */
+int spl_mmc_load_image_raw_os(void);
+#endif
+
 /* YMODEM SPL functions */
 int spl_ymodem_load_image(void);
 
