@@ -65,8 +65,10 @@
 	"name=boot,size=10M,uuid=${uuid_gpt_boot};" \
 	"name=system,size=768M,uuid=${uuid_gpt_system};" \
 	"name=cache,size=256M,uuid=${uuid_gpt_cache};" \
-	"name=ipu1,size=1M,uuid=${uuid_gpt_ipu1};" \
-	"name=ipu2,size=1M,uuid=${uuid_gpt_ipu2};" \
+	"name=ipu1,size=8M,uuid=${uuid_gpt_ipu1};" \
+	"name=ipu2,size=8M,uuid=${uuid_gpt_ipu2};" \
+	"name=dsp1,size=8M,uuid=${uuid_gpt_dsp1};" \
+	"name=dsp2,size=8M,uuid=${uuid_gpt_dsp2};" \
 	"name=userdata,size=-,uuid=${uuid_gpt_userdata}"
 
 #define DFU_ALT_INFO_MMC \
