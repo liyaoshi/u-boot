@@ -66,7 +66,6 @@
 #define DFUARGS
 #endif
 
-#ifndef CONFIG_SPL_BUILD
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DEFAULT_LINUX_BOOT_ENV \
@@ -165,7 +164,6 @@
 	"run mmcboot;" \
 	"run emmc_android_boot; " \
 	""
-#endif
 
 /*
  * SPL related defines.  The Public RAM memory map the ROM defines the
