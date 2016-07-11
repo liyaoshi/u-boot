@@ -73,7 +73,7 @@
 	DEFAULT_MMC_TI_ARGS \
 	"console=" CONSOLEDEV ",115200n8\0" \
 	"fdtfile=undefined\0" \
-	"boot_os=1\0" \
+	"boot_os=0\0" \
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \

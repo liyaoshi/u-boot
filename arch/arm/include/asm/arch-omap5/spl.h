@@ -22,6 +22,18 @@
 #define BOOT_DEVICE_UART	0x43
 #define BOOT_DEVICE_USB		0x45
 
+#ifdef CONFIG_DRA7XX
+#define SYSBOOT_TYPE_MASK   (0x30)
+/* Peripheral Preferred Booting */
+#define SYSBOOT_TYPE_PER    (0x00)
+/* Development Booting */
+#define SYSBOOT_TYPE_DEV    (0x10)
+/* Memory Preferred Booting */
+#define SYSBOOT_TYPE_MEM    (0x20)
+/* Automotive Production Booting */
+#define SYSBOOT_TYPE_PROD   (0x30)
+#endif
+
 #define MMC_BOOT_DEVICES_START	BOOT_DEVICE_MMC1
 #define MMC_BOOT_DEVICES_END	BOOT_DEVICE_MMC2_2
 #endif

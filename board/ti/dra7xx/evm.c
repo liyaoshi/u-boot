@@ -28,6 +28,7 @@
 #include <dwc3-omap-uboot.h>
 #include <ti-usb-phy-uboot.h>
 #include <miiphy.h>
+#include <spl.h>
 #include <pcf8575.h>
 #include <spl.h>
 
@@ -709,14 +710,17 @@ int spl_start_uboot(void)
 	if (serial_tstc() && serial_getc() == 'c')
 		return 1;
 
+	if ((get_sysboot_value() & SYSBOOT_TYPE_MASK) == SYSBOOT_TYPE_PROD)
+		return 0;
+
 #ifdef CONFIG_SPL_ENV_SUPPORT
 	env_init();
 	env_relocate_spec();
-	if (getenv_yesno("boot_os") != 1)
-		return 1;
+	if (getenv_yesno("boot_os") == 1)
+		return 0;
 #endif
 
-	return 0;
+	return 1;
 }
 #endif
 
