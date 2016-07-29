@@ -57,11 +57,22 @@
 #define MMC_MODE_SPI		(1 << 4)
 #define MMC_MODE_DDR_52MHz	(1 << 5)
 #define MMC_MODE_HS200		(1 << 6)
+#define MMC_MODE_UHS_SDR12	(1 << 7)
+#define MMC_MODE_UHS_SDR25	(1 << 8)
+#define MMC_MODE_UHS_SDR50	(1 << 9)
+#define MMC_MODE_UHS_SDR104	(1 << 10)
+#define MMC_MODE_UHS_DDR50	(1 << 11)
 
 #define MMC_HIGH_26_MAX_DTR	26000000
 #define MMC_HIGH_52_MAX_DTR	52000000
 #define MMC_HIGH_DDR_MAX_DTR	52000000
 #define MMC_HS200_MAX_DTR	200000000
+#define HIGH_SPEED_MAX_DTR	50000000
+#define UHS_SDR104_MAX_DTR	208000000
+#define UHS_SDR50_MAX_DTR	100000000
+#define UHS_DDR50_MAX_DTR	50000000
+#define UHS_SDR25_MAX_DTR	UHS_DDR50_MAX_DTR
+#define UHS_SDR12_MAX_DTR	25000000
 
 #define SD_DATA_4BIT	0x00040000
 
@@ -92,6 +103,7 @@
 #define MMC_CMD_SET_BLOCKLEN		16
 #define MMC_CMD_READ_SINGLE_BLOCK	17
 #define MMC_CMD_READ_MULTIPLE_BLOCK	18
+#define MMC_SEND_TUNING_BLOCK		19
 #define MMC_SEND_TUNING_BLOCK_HS200	21
 #define MMC_CMD_SET_BLOCK_COUNT         23
 #define MMC_CMD_WRITE_SINGLE_BLOCK	24
@@ -123,8 +135,22 @@
 #define SD_HIGHSPEED_BUSY	0x00020000
 #define SD_HIGHSPEED_SUPPORTED	0x00020000
 
+#define UHS_SDR12_BUS_SPEED	0
+#define HIGH_SPEED_BUS_SPEED	1
+#define UHS_SDR25_BUS_SPEED	1
+#define UHS_SDR50_BUS_SPEED	2
+#define UHS_SDR104_BUS_SPEED	3
+#define UHS_DDR50_BUS_SPEED	4
+
+#define SD_MODE_UHS_SDR12	(1 << UHS_SDR12_BUS_SPEED)
+#define SD_MODE_UHS_SDR25	(1 << UHS_SDR25_BUS_SPEED)
+#define SD_MODE_UHS_SDR50	(1 << UHS_SDR50_BUS_SPEED)
+#define SD_MODE_UHS_SDR104	(1 << UHS_SDR104_BUS_SPEED)
+#define SD_MODE_UHS_DDR50	(1 << UHS_DDR50_BUS_SPEED)
+
 #define OCR_BUSY		0x80000000
 #define OCR_HCS			0x40000000
+#define OCR_S18R		0x1000000
 #define OCR_VOLTAGE_MASK	0x007FFF80
 #define OCR_ACCESS_MODE		0x60000000
 
@@ -281,10 +307,25 @@
 #define MMC_TIMING_SD_HS	2
 #define MMC_TIMING_MMC_DDR52	3
 #define MMC_TIMING_MMC_HS200	4
+#define MMC_TIMING_UHS_SDR12	5
+#define MMC_TIMING_UHS_SDR25	6
+#define MMC_TIMING_UHS_SDR50	7
+#define MMC_TIMING_UHS_SDR104	8
+#define MMC_TIMING_UHS_DDR50	9
 
 #define MMC_BUS_WIDTH_1		1
 #define MMC_BUS_WIDTH_4		4
 #define MMC_BUS_WIDTH_8		8
+
+#define MMC_SIGNAL_VOLTAGE_330	1
+#define MMC_SIGNAL_VOLTAGE_180	2
+#define MMC_SIGNAL_VOLTAGE_120	3
+
+/*
+ * SD bus widths
+ */
+#define SD_BUS_WIDTH_1		0
+#define SD_BUS_WIDTH_4		2
 
 /* Maximum block size for MMC */
 #define MMC_MAX_BLOCK_LEN	512
@@ -349,11 +390,13 @@ struct mmc;
 struct mmc_ops {
 	int (*send_cmd)(struct mmc *mmc,
 			struct mmc_cmd *cmd, struct mmc_data *data);
-	void (*set_ios)(struct mmc *mmc);
+	int (*set_ios)(struct mmc *mmc);
 	int (*init)(struct mmc *mmc);
+	int (*set_vdd)(struct mmc *mmc, int enable);
 	int (*getcd)(struct mmc *mmc);
 	int (*getwp)(struct mmc *mmc);
 	int (*execute_tuning)(struct mmc *mmc, uint opcode);
+	int (*card_busy)(struct mmc *mmc);
 };
 
 struct mmc_config {
@@ -375,9 +418,11 @@ struct mmc {
 	void *priv;
 	uint has_init;
 	int high_capacity;
+	u8 clk_disable;
 	uint bus_width;
 	uint clock;
 	uint timing;
+	uint signal_voltage;
 	uint card_caps;
 	uint ocr;
 	uint dsr;
@@ -407,6 +452,8 @@ struct mmc {
 	char init_in_progress;	/* 1 if we have done mmc_start_init() */
 	char preinit;		/* start init as early as possible */
 	int ddr_mode;
+	unsigned int sd_bus_speed;
+	unsigned int sd3_bus_mode;
 };
 
 struct mmc_hwpart_conf {
@@ -438,7 +485,7 @@ int mmc_init(struct mmc *mmc);
 int mmc_send_tuning(struct mmc *mmc, u32 opcode, int *cmd_error);
 int mmc_of_parse(const void *fdt, int node, struct mmc_config *cfg);
 int mmc_read(struct mmc *mmc, u64 src, uchar *dst, int size);
-void mmc_set_clock(struct mmc *mmc, uint clock);
+int mmc_set_clock(struct mmc *mmc, uint clock, u8 disable);
 struct mmc *find_mmc_device(int dev_num);
 int mmc_set_dev(int dev_num);
 void print_mmc_devices(char separator);

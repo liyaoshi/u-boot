@@ -43,6 +43,7 @@
 #include <asm/arch/sys_proto.h>
 #endif
 #include <dm.h>
+#include <power/regulator.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -90,11 +91,19 @@ struct omap_hsmmc_data {
 	uint desc_slot;
 	int node;
 	char *version;
+	struct udevice *vmmc_supply;
+	ushort last_cmd;
+	uint signal_voltage;
 #ifdef CONFIG_IODELAY_RECALIBRATION
 	struct omap_hsmmc_pinctrl_state *default_pinctrl_state;
 	struct omap_hsmmc_pinctrl_state *hs_pinctrl_state;
 	struct omap_hsmmc_pinctrl_state *hs200_1_8v_pinctrl_state;
 	struct omap_hsmmc_pinctrl_state *ddr_1_8v_pinctrl_state;
+	struct omap_hsmmc_pinctrl_state *sdr104_pinctrl_state;
+	struct omap_hsmmc_pinctrl_state *ddr50_pinctrl_state;
+	struct omap_hsmmc_pinctrl_state *sdr50_pinctrl_state;
+	struct omap_hsmmc_pinctrl_state *sdr25_pinctrl_state;
+	struct omap_hsmmc_pinctrl_state *sdr12_pinctrl_state;
 #endif
 #endif
 };
@@ -174,7 +183,7 @@ static void omap4_vmmc_pbias_config(struct mmc *mmc)
 #endif
 
 #if defined(CONFIG_OMAP54XX) && defined(CONFIG_PALMAS_POWER)
-static void omap5_pbias_config(struct mmc *mmc)
+static void omap5_pbias_config(struct mmc *mmc, uint voltage)
 {
 	u32 value = 0;
 
@@ -185,7 +194,7 @@ static void omap5_pbias_config(struct mmc *mmc)
 	value &= ~SDCARD_BIAS_PWRDNZ;
 	writel(value, (*ctrl)->control_pbias);
 
-	palmas_mmc1_poweron_ldo();
+	palmas_mmc1_poweron_ldo(voltage);
 
 	value = readl((*ctrl)->control_pbias);
 	value |= SDCARD_BIAS_PWRDNZ;
@@ -243,7 +252,7 @@ static unsigned char mmc_board_init(struct mmc *mmc)
 #endif
 #if defined(CONFIG_OMAP54XX) && defined(CONFIG_PALMAS_POWER)
 	if (mmc->block_dev.devnum == 0)
-		omap5_pbias_config(mmc);
+		omap5_pbias_config(mmc, LDO_VOLT_3V0);
 #endif
 
 	return 0;
@@ -297,6 +306,27 @@ static void omap_hsmmc_set_timing(struct mmc *mmc)
 		val |= AC12_UHSMC_SDR104;
 		pinctrl_state = priv->hs200_1_8v_pinctrl_state;
 		break;
+	case MMC_TIMING_UHS_SDR104:
+		val |= AC12_UHSMC_SDR104;
+		pinctrl_state = priv->sdr104_pinctrl_state;
+		break;
+	case MMC_TIMING_UHS_DDR50:
+		val |= AC12_UHSMC_DDR50;
+		writel(readl(&mmc_base->con) | DDR, &mmc_base->con);
+		pinctrl_state = priv->ddr50_pinctrl_state;
+		break;
+	case MMC_TIMING_UHS_SDR50:
+		val |= AC12_UHSMC_SDR50;
+		pinctrl_state = priv->sdr50_pinctrl_state;
+		break;
+	case MMC_TIMING_UHS_SDR25:
+		val |= AC12_UHSMC_SDR25;
+		pinctrl_state = priv->sdr25_pinctrl_state;
+		break;
+	case MMC_TIMING_UHS_SDR12:
+		val |= AC12_UHSMC_SDR12;
+		pinctrl_state = priv->sdr12_pinctrl_state;
+		break;
 	case MMC_TIMING_SD_HS:
 	case MMC_TIMING_MMC_HS:
 		val |= AC12_UHSMC_RES;
@@ -331,7 +361,7 @@ static void omap_hsmmc_set_timing(struct mmc *mmc)
 }
 #endif
 
-static void omap_hsmmc_conf_bus_power(struct mmc *mmc)
+static void omap_hsmmc_conf_bus_power(struct mmc *mmc, uint signal_voltage)
 {
 	struct hsmmc *mmc_base;
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
@@ -341,7 +371,7 @@ static void omap_hsmmc_conf_bus_power(struct mmc *mmc)
 
 	val = readl(&mmc_base->hctl) & ~SDVS_MASK;
 
-	switch (priv->iov) {
+	switch (signal_voltage) {
 	case IOV_3V3:
 		val |= SDVS_3V3;
 		break;
@@ -354,6 +384,133 @@ static void omap_hsmmc_conf_bus_power(struct mmc *mmc)
 	}
 
 	writel(val, &mmc_base->hctl);
+}
+
+static int omap_hsmmc_card_busy_low(struct mmc *mmc)
+{
+	u32 val;
+	int i;
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+
+	mmc_base = priv->base_addr;
+
+	val = readl(&mmc_base->con);
+	val &= ~CON_CLKEXTFREE;
+	val |= CON_PADEN;
+	writel(val, &mmc_base->con);
+
+	/* By observation, card busy status reflects in 100 - 200us */
+	for (i = 0; i < 5; i++) {
+		val = readl(&mmc_base->pstate);
+		if (!(val & (PSTATE_CLEV | PSTATE_DLEV)))
+			return true;
+
+		udelay(200);
+	}
+
+	return false;
+}
+
+static int omap_hsmmc_card_busy_high(struct mmc *mmc)
+{
+	int ret = true;
+	u32 val;
+	int i;
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+
+	mmc_base = priv->base_addr;
+
+	val = readl(&mmc_base->con);
+	val |= CON_CLKEXTFREE;
+	writel(val, &mmc_base->con);
+
+	/* By observation, card busy status reflects in 100 - 200us */
+	for (i = 0; i < 5; i++) {
+		val = readl(&mmc_base->pstate);
+		if ((val & PSTATE_CLEV) && (val & PSTATE_DLEV)) {
+			val = readl(&mmc_base->con);
+			val &= ~(CON_CLKEXTFREE | CON_PADEN);
+			writel(val, &mmc_base->con);
+			ret = false;
+			goto ret;
+		}
+
+		udelay(200);
+	}
+
+ret:
+	return ret;
+}
+
+static int omap_hsmmc_card_busy(struct mmc *mmc)
+{
+	int ret;
+	u32 val;
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+
+	mmc_base = priv->base_addr;
+
+	if (priv->last_cmd != SD_CMD_SWITCH_UHS18V) {
+		val = readl(&mmc_base->pstate);
+		if (val & PSTATE_DLEV_DAT0)
+			return true;
+		return false;
+	}
+
+	val = readl(&mmc_base->ac12);
+	if (val & AC12_V1V8_SIGEN)
+		ret = omap_hsmmc_card_busy_high(mmc);
+	else
+		ret = omap_hsmmc_card_busy_low(mmc);
+
+	return ret;
+}
+
+static int omap_hsmmc_set_signal_voltage(struct mmc *mmc)
+{
+	u32 val;
+	struct hsmmc *mmc_base;
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+
+	mmc_base = priv->base_addr;
+	priv->signal_voltage = mmc->signal_voltage;
+
+	if (mmc->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+		val = readl(&mmc_base->capa);
+		if (!(val & VS30_3V0SUP))
+			return -EOPNOTSUPP;
+
+		omap_hsmmc_conf_bus_power(mmc, IOV_3V0);
+
+		val = readl(&mmc_base->ac12);
+		val &= ~AC12_V1V8_SIGEN;
+		writel(val, &mmc_base->ac12);
+
+#if defined(CONFIG_OMAP54XX) && defined(CONFIG_PALMAS_POWER)
+		omap5_pbias_config(mmc, LDO_VOLT_3V0);
+#endif
+	} else if (mmc->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+		val = readl(&mmc_base->capa);
+		if (!(val & VS18_1V8SUP))
+			return -EOPNOTSUPP;
+
+		omap_hsmmc_conf_bus_power(mmc, IOV_1V8);
+
+		val = readl(&mmc_base->ac12);
+		val |= AC12_V1V8_SIGEN;
+		writel(val, &mmc_base->ac12);
+
+#if defined(CONFIG_OMAP54XX) && defined(CONFIG_PALMAS_POWER)
+		omap5_pbias_config(mmc, LDO_VOLT_1V8);
+#endif
+	} else {
+		return -EOPNOTSUPP;
+	}
+
+	return 0;
 }
 
 static void omap_hsmmc_set_capabilities(struct mmc *mmc)
@@ -500,6 +657,23 @@ tuning_error:
 
 	return ret;
 }
+
+#ifdef CONFIG_DM_REGULATOR
+static int omap_hsmmc_set_vdd(struct mmc *mmc, int enable)
+{
+	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	struct hsmmc *mmc_base = priv->base_addr;
+
+	if (enable) {
+		regulator_set_enable(priv->vmmc_supply, true);
+		mmc_init_stream(mmc_base);
+	} else {
+		regulator_set_enable(priv->vmmc_supply, false);
+	}
+
+	return 0;
+}
+#endif
 #endif
 
 static void mmc_enable_irq(struct mmc *mmc, struct mmc_cmd *cmd)
@@ -556,7 +730,7 @@ static int omap_hsmmc_init_setup(struct mmc *mmc)
 
 #ifdef CONFIG_DM_MMC
 	omap_hsmmc_set_capabilities(mmc);
-	omap_hsmmc_conf_bus_power(mmc);
+	omap_hsmmc_conf_bus_power(mmc, priv->iov);
 	reg_val = readl(&mmc_base->hl_hwinfo);
 	if (reg_val & MADMA_EN)
 		priv->controller_flags |= OMAP_HSMMC_USE_ADMA;
@@ -589,7 +763,10 @@ static int omap_hsmmc_init_setup(struct mmc *mmc)
 	writel(readl(&mmc_base->hctl) | SDBP_PWRON, &mmc_base->hctl);
 
 	mmc_enable_irq(mmc, NULL);
+
+#ifndef CONFIG_DM_REGULATOR
 	mmc_init_stream(mmc_base);
+#endif
 
 	return 0;
 }
@@ -760,6 +937,7 @@ static int omap_hsmmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
 	ulong start;
 #ifdef CONFIG_DM_MMC
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
+	priv->last_cmd = cmd->cmdidx;
 #endif
 
 	mmc_base = ((struct omap_hsmmc_data *)mmc->priv)->base_addr;
@@ -1099,9 +1277,11 @@ static void omap_hsmmc_set_bus_width(struct mmc *mmc)
 	priv_data->bus_width = mmc->bus_width;
 }
 
-static void omap_hsmmc_set_ios(struct mmc *mmc)
+static int omap_hsmmc_set_ios(struct mmc *mmc)
 {
 	struct omap_hsmmc_data *priv_data = mmc->priv;
+	struct hsmmc *mmc_base = priv_data->base_addr;
+	int ret = 0;
 
 	if (priv_data->bus_width != mmc->bus_width)
 		omap_hsmmc_set_bus_width(mmc);
@@ -1109,12 +1289,21 @@ static void omap_hsmmc_set_ios(struct mmc *mmc)
 	if (priv_data->clock != mmc->clock)
 		omap_hsmmc_set_clock(mmc);
 
+	if (mmc->clk_disable)
+		omap_hsmmc_stop_clock(mmc_base);
+	else
+		omap_hsmmc_start_clock(mmc_base);
+
 #ifdef CONFIG_DM_MMC
 #ifdef CONFIG_IODELAY_RECALIBRATION
 	if (priv_data->timing != mmc->timing)
 		omap_hsmmc_set_timing(mmc);
 #endif
+	if (priv_data->signal_voltage != mmc->signal_voltage)
+		ret = omap_hsmmc_set_signal_voltage(mmc);
 #endif
+
+	return ret;
 }
 
 #ifdef OMAP_HSMMC_USE_GPIO
@@ -1186,6 +1375,10 @@ static const struct mmc_ops omap_hsmmc_ops = {
 #endif
 #ifdef CONFIG_DM_MMC
 	.execute_tuning = omap_hsmmc_execute_tuning,
+	.card_busy = omap_hsmmc_card_busy,
+#ifdef CONFIG_DM_REGULATOR
+	.set_vdd	= omap_hsmmc_set_vdd,
+#endif
 #endif
 };
 
@@ -1531,6 +1724,11 @@ static int omap_hsmmc_get_pinctrl_state(struct mmc *mmc)
 	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_HS200, hs200_1_8v);
 	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_DDR_52MHz, ddr_1_8v);
 	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_HS, hs);
+	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_UHS_SDR104, sdr104);
+	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_UHS_DDR50, ddr50);
+	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_UHS_SDR50, sdr50);
+	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_UHS_SDR25, sdr25);
+	OMAP_HSMMC_SETUP_PINCTRL(MMC_MODE_UHS_SDR12, sdr12);
 
 	return 0;
 }
@@ -1580,7 +1778,8 @@ static int omap_hsmmc_platform_fixup(struct mmc *mmc)
 
 	if (platform_fixup_disable_uhs_mode()) {
 		priv->version = "rev11";
-		cfg->host_caps &= ~MMC_MODE_HS200;
+		cfg->host_caps &= ~(MMC_MODE_HS200 | MMC_MODE_UHS_SDR104
+				    | MMC_MODE_UHS_SDR50);
 	}
 
 	return 0;
@@ -1607,6 +1806,9 @@ static int omap_hsmmc_probe(struct udevice *dev)
 
 	omap_hsmmc_platform_fixup(mmc);
 
+#ifdef CONFIG_DM_REGULATOR
+	device_get_supply_regulator(dev, "vmmc-supply", &priv->vmmc_supply);
+#endif
 #ifdef OMAP_HSMMC_USE_GPIO
 	gpio_request_by_name(dev, "cd-gpios", 0, &priv->cd_gpio, GPIOD_IS_IN);
 	gpio_request_by_name(dev, "wp-gpios", 0, &priv->wp_gpio, GPIOD_IS_IN);

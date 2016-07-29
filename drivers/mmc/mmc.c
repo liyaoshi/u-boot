@@ -23,8 +23,12 @@
 
 static struct list_head mmc_devices;
 static int cur_dev_num = -1;
-static void mmc_set_timing(struct mmc *mmc, uint timing);
+static int mmc_set_timing(struct mmc *mmc, uint timing);
+static int mmc_set_bus_width(struct mmc *mmc, uint width);
 static int mmc_select_bus_width(struct mmc *mmc);
+static int mmc_set_signal_voltage(struct mmc *mmc, uint signal_voltage);
+static int mmc_set_vdd(struct mmc *mmc, int enable);
+static void mmc_power_cycle(struct mmc *mmc);
 
 __weak int board_mmc_getwp(struct mmc *mmc)
 {
@@ -380,7 +384,76 @@ static int mmc_go_idle(struct mmc *mmc)
 	return 0;
 }
 
-static int sd_send_op_cond(struct mmc *mmc)
+static int mmc_host_uhs(struct mmc *mmc)
+{
+	return mmc->cfg->host_caps &
+	(MMC_MODE_UHS_SDR12 | MMC_MODE_UHS_SDR25 |
+	MMC_MODE_UHS_SDR50 | MMC_MODE_UHS_SDR104 |
+	MMC_MODE_UHS_DDR50);
+}
+
+static int mmc_switch_voltage(struct mmc *mmc, int signal_voltage)
+{
+	struct mmc_cmd cmd = {0};
+	int err = 0;
+
+	/*
+	 * Send CMD11 only if the request is to switch the card to
+	 * 1.8V signalling.
+	 */
+	if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
+		return mmc_set_signal_voltage(mmc, signal_voltage);
+
+	cmd.cmdidx = SD_CMD_SWITCH_UHS18V;
+	cmd.cmdarg = 0;
+	cmd.resp_type = MMC_RSP_R1;
+
+	err = mmc_send_cmd(mmc, &cmd, NULL);
+	if (err)
+		goto fail;
+
+	if (!mmc_host_is_spi(host) && (cmd.response[0] & MMC_STATUS_ERROR))
+		goto fail;
+
+	/*
+	 * The card should drive cmd and dat[0:3] low immediately
+	 * after the response of cmd11, but wait 1 ms to be sure
+	 */
+	udelay(1000);
+	if (mmc->cfg->ops->card_busy && !mmc->cfg->ops->card_busy(mmc))
+		goto fail;
+
+	/*
+	 * During a signal voltage level switch, the clock must be gated
+	 * for 5 ms according to the SD spec
+	 */
+	mmc_set_clock(mmc, mmc->clock, true);
+
+	err = mmc_set_signal_voltage(mmc, signal_voltage);
+	if (err)
+		goto fail;
+
+	/* Keep clock gated for at least 10 ms, though spec only says 5 ms */
+	udelay(10000);
+	mmc_set_clock(mmc, mmc->clock, false);
+
+	/* Wait for at least 1 ms according to spec */
+	udelay(1000);
+
+	/*
+	 * Failure to switch is indicated by the card holding
+	 * dat[0:3] low
+	 */
+	if (mmc->cfg->ops->card_busy && mmc->cfg->ops->card_busy(mmc))
+		goto fail;
+
+	return 0;
+
+fail:
+	return -EIO;
+}
+
+static int sd_send_op_cond(struct mmc *mmc, int uhs_en)
 {
 	int timeout = 1000;
 	int err;
@@ -412,6 +485,9 @@ static int sd_send_op_cond(struct mmc *mmc)
 		if (mmc->version == SD_VERSION_2)
 			cmd.cmdarg |= OCR_HCS;
 
+		if (mmc_host_uhs(mmc) && uhs_en)
+			cmd.cmdarg |= OCR_S18R;
+
 		err = mmc_send_cmd(mmc, &cmd, NULL);
 
 		if (err)
@@ -441,6 +517,13 @@ static int sd_send_op_cond(struct mmc *mmc)
 	}
 
 	mmc->ocr = cmd.response[0];
+
+	if (!(mmc_host_is_spi(mmc)) && (cmd.response[0] & 0x41000000)
+	    == 0x41000000) {
+		err = mmc_switch_voltage(mmc, MMC_SIGNAL_VOLTAGE_180);
+		if (err)
+			return err;
+	}
 
 	mmc->high_capacity = ((mmc->ocr & OCR_HCS) == OCR_HCS);
 	mmc->rca = 0;
@@ -974,6 +1057,206 @@ static int sd_switch(struct mmc *mmc, int mode, int group, u8 value, u8 *resp)
 	return mmc_send_cmd(mmc, &cmd, &data);
 }
 
+static int mmc_app_set_bus_width(struct mmc *mmc, int width)
+{
+	int err;
+	struct mmc_cmd cmd;
+
+	cmd.cmdidx = MMC_CMD_APP_CMD;
+	cmd.resp_type = MMC_RSP_R1;
+	cmd.cmdarg = mmc->rca << 16;
+
+	err = mmc_send_cmd(mmc, &cmd, NULL);
+	if (err)
+		return err;
+
+	cmd.cmdidx = SD_CMD_APP_SET_BUS_WIDTH;
+	cmd.resp_type = MMC_RSP_R1;
+	switch (width) {
+	case MMC_BUS_WIDTH_1:
+		cmd.cmdarg = SD_BUS_WIDTH_1;
+		break;
+	case MMC_BUS_WIDTH_4:
+		cmd.cmdarg = SD_BUS_WIDTH_4;
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	err = mmc_send_cmd(mmc, &cmd, NULL);
+	if (err)
+		return err;
+
+	mmc_set_bus_width(mmc, width);
+
+	return 0;
+}
+
+static void sd_update_bus_speed_mode(struct mmc *mmc)
+{
+	u32 caps = mmc->cfg->host_caps;
+	/*
+	 * If the host doesn't support any of the UHS-I modes, fallback on
+	 * default speed.
+	 */
+	if (!mmc_host_uhs(mmc)) {
+		mmc->sd_bus_speed = 0;
+		return;
+	}
+
+	if ((caps & MMC_MODE_UHS_SDR104) &&
+	    (mmc->sd3_bus_mode & SD_MODE_UHS_SDR104))
+		mmc->sd_bus_speed = UHS_SDR104_BUS_SPEED;
+	else if ((caps & MMC_MODE_UHS_DDR50) &&
+		 (mmc->sd3_bus_mode & SD_MODE_UHS_DDR50))
+		mmc->sd_bus_speed = UHS_DDR50_BUS_SPEED;
+	else if ((caps & (MMC_MODE_UHS_SDR104 |
+		 MMC_MODE_UHS_SDR50)) && (mmc->sd3_bus_mode &
+		 SD_MODE_UHS_SDR50))
+		mmc->sd_bus_speed = UHS_SDR50_BUS_SPEED;
+	else if ((caps & (MMC_MODE_UHS_SDR104 |
+		 MMC_MODE_UHS_SDR50 | MMC_MODE_UHS_SDR25)) &&
+		 (mmc->sd3_bus_mode & SD_MODE_UHS_SDR25))
+		mmc->sd_bus_speed = UHS_SDR25_BUS_SPEED;
+	else if ((caps & (MMC_MODE_UHS_SDR104 |
+		 MMC_MODE_UHS_SDR50 | MMC_MODE_UHS_SDR25 |
+		 MMC_MODE_UHS_SDR12)) && (mmc->sd3_bus_mode &
+		 SD_MODE_UHS_SDR12))
+		mmc->sd_bus_speed = UHS_SDR12_BUS_SPEED;
+}
+
+static int sd_set_bus_speed_mode(struct mmc *mmc)
+{
+	int err;
+	unsigned int timing = 0;
+	uint hs_max_dtr = mmc->tran_speed;
+	ALLOC_CACHE_ALIGN_BUFFER(uint, switch_status, 16);
+
+	switch (mmc->sd_bus_speed) {
+	case UHS_SDR104_BUS_SPEED:
+		timing = MMC_TIMING_UHS_SDR104;
+		hs_max_dtr = UHS_SDR104_MAX_DTR;
+		break;
+	case UHS_DDR50_BUS_SPEED:
+		timing = MMC_TIMING_UHS_DDR50;
+		hs_max_dtr = UHS_DDR50_MAX_DTR;
+		break;
+	case UHS_SDR50_BUS_SPEED:
+		timing = MMC_TIMING_UHS_SDR50;
+		hs_max_dtr = UHS_SDR50_MAX_DTR;
+		break;
+	case UHS_SDR25_BUS_SPEED:
+		timing = MMC_TIMING_UHS_SDR25;
+		hs_max_dtr = UHS_SDR25_MAX_DTR;
+		break;
+	case UHS_SDR12_BUS_SPEED:
+		timing = MMC_TIMING_UHS_SDR12;
+		hs_max_dtr = UHS_SDR12_MAX_DTR;
+		break;
+	default:
+		return 0;
+	}
+
+	mmc->tran_speed = hs_max_dtr;
+
+	err = sd_switch(mmc, SD_SWITCH_SWITCH, 0, mmc->sd_bus_speed,
+			(u8 *)switch_status);
+	if (err)
+		return err;
+
+	if (((__be32_to_cpu(switch_status[4]) & 0x0f000000) >> 24) ==
+	    mmc->sd_bus_speed) {
+		mmc_set_timing(mmc, timing);
+		mmc_set_clock(mmc, hs_max_dtr, false);
+	}
+
+	return 0;
+}
+
+/*
+ * UHS-I specific initialization procedure
+ */
+static int mmc_sd_init_uhs_card(struct mmc *mmc)
+{
+	int err = 0;
+
+	if (mmc->version != SD_VERSION_3)
+		return 0;
+
+	if (mmc->card_caps & MMC_MODE_4BIT) {
+		err = mmc_app_set_bus_width(mmc, MMC_BUS_WIDTH_4);
+		if (err)
+			return err;
+		mmc_set_bus_width(mmc, MMC_BUS_WIDTH_4);
+	}
+
+	/*
+	 * Select the bus speed mode depending on host
+	 * and card capability.
+	 */
+	sd_update_bus_speed_mode(mmc);
+
+	/* Set bus speed mode of the card */
+	err = sd_set_bus_speed_mode(mmc);
+	if (err)
+		return err;
+
+	/*
+	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
+	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
+	 */
+	if (!mmc_host_is_spi(mmc) &&
+	    (mmc->timing == MMC_TIMING_UHS_SDR50 ||
+	     mmc->timing == MMC_TIMING_UHS_DDR50 ||
+	     mmc->timing == MMC_TIMING_UHS_SDR104)) {
+		err = mmc->cfg->ops->execute_tuning(mmc, MMC_SEND_TUNING_BLOCK);
+
+		/*
+		 * As SD Specifications Part1 Physical Layer Specification
+		 * Version 3.01 says, CMD19 tuning is available for unlocked
+		 * cards in transfer state of 1.8V signaling mode. The small
+		 * difference between v3.00 and 3.01 spec means that CMD19
+		 * tuning is also available for DDR50 mode.
+		 */
+		if (err && mmc->timing == MMC_TIMING_UHS_DDR50) {
+			printf("ddr50 tuning failed\n");
+			err = 0;
+		}
+	}
+
+	return err;
+}
+
+static int mmc_sd_switch_hs(struct mmc *mmc)
+{
+	int err;
+	ALLOC_CACHE_ALIGN_BUFFER(uint, switch_status, 16);
+
+	/*
+	 * If the host doesn't support SD_HIGHSPEED, do not switch card to
+	 * HIGHSPEED mode even if the card support SD_HIGHSPPED.
+	 * This can avoid furthur problem when the card runs in different
+	 * mode between the host.
+	 */
+	if (!((mmc->cfg->host_caps & MMC_MODE_HS_52MHz) &&
+	      (mmc->cfg->host_caps & MMC_MODE_HS)))
+		return -EINVAL;
+
+	if (!(mmc->card_caps & MMC_MODE_HS))
+		return -EINVAL;
+
+	err = sd_switch(mmc, SD_SWITCH_SWITCH, 0, 1, (u8 *)switch_status);
+	if (err)
+		return err;
+
+	if (!((__be32_to_cpu(switch_status[4]) & 0x0f000000) == 0x01000000))
+		return -EINVAL;
+
+	mmc_set_timing(mmc, MMC_TIMING_SD_HS);
+	mmc->tran_speed = HIGH_SPEED_MAX_DTR;
+
+	return 0;
+}
 
 static int sd_change_freq(struct mmc *mmc)
 {
@@ -1060,27 +1343,29 @@ retry_scr:
 			break;
 	}
 
+	mmc->sd3_bus_mode = __be32_to_cpu(switch_status[3]) >> 16 & 0x1f;
+
 	/* If high-speed isn't supported, we return */
-	if (!(__be32_to_cpu(switch_status[3]) & SD_HIGHSPEED_SUPPORTED))
-		return 0;
-
-	/*
-	 * If the host doesn't support SD_HIGHSPEED, do not switch card to
-	 * HIGHSPEED mode even if the card support SD_HIGHSPPED.
-	 * This can avoid furthur problem when the card runs in different
-	 * mode between the host.
-	 */
-	if (!((mmc->cfg->host_caps & MMC_MODE_HS_52MHz) &&
-		(mmc->cfg->host_caps & MMC_MODE_HS)))
-		return 0;
-
-	err = sd_switch(mmc, SD_SWITCH_SWITCH, 0, 1, (u8 *)switch_status);
-
-	if (err)
-		return err;
-
-	if ((__be32_to_cpu(switch_status[4]) & 0x0f000000) == 0x01000000)
+	if (__be32_to_cpu(switch_status[3]) & SD_HIGHSPEED_SUPPORTED)
 		mmc->card_caps |= MMC_MODE_HS;
+
+	/* Restrict card's capabilities by what the host can do */
+	mmc->card_caps &= mmc->cfg->host_caps;
+
+	if (mmc->ocr & OCR_S18R) {
+		mmc_sd_init_uhs_card(mmc);
+	} else {
+		err = mmc_sd_switch_hs(mmc);
+		if (err)
+			mmc->tran_speed = 25000000;
+
+		mmc_set_clock(mmc, mmc->tran_speed, false);
+		if (mmc->card_caps & MMC_MODE_4BIT) {
+			err = mmc_app_set_bus_width(mmc, MMC_BUS_WIDTH_4);
+			if (err)
+				return err;
+		}
+	}
 
 	return 0;
 }
@@ -1116,13 +1401,27 @@ static const int multipliers[] = {
 	80,
 };
 
-static void mmc_set_ios(struct mmc *mmc)
+static int mmc_set_vdd(struct mmc *mmc, int enable)
 {
-	if (mmc->cfg->ops->set_ios)
-		mmc->cfg->ops->set_ios(mmc);
+	int ret = 0;
+
+	if (mmc->cfg->ops->set_vdd)
+		ret = mmc->cfg->ops->set_vdd(mmc, enable);
+
+	return ret;
 }
 
-void mmc_set_clock(struct mmc *mmc, uint clock)
+static int mmc_set_ios(struct mmc *mmc)
+{
+	int ret = 0;
+
+	if (mmc->cfg->ops->set_ios)
+		ret = mmc->cfg->ops->set_ios(mmc);
+
+	return ret;
+}
+
+int mmc_set_clock(struct mmc *mmc, uint clock, u8 disable)
 {
 	if (clock > mmc->cfg->f_max)
 		clock = mmc->cfg->f_max;
@@ -1131,21 +1430,28 @@ void mmc_set_clock(struct mmc *mmc, uint clock)
 		clock = mmc->cfg->f_min;
 
 	mmc->clock = clock;
+	mmc->clk_disable = disable;
 
-	mmc_set_ios(mmc);
+	return mmc_set_ios(mmc);
 }
 
-static void mmc_set_timing(struct mmc *mmc, uint timing)
+static int mmc_set_timing(struct mmc *mmc, uint timing)
 {
 	mmc->timing = timing;
-	mmc_set_ios(mmc);
+	return mmc_set_ios(mmc);
 }
 
-static void mmc_set_bus_width(struct mmc *mmc, uint width)
+static int mmc_set_bus_width(struct mmc *mmc, uint width)
 {
 	mmc->bus_width = width;
 
-	mmc_set_ios(mmc);
+	return mmc_set_ios(mmc);
+}
+
+static int mmc_set_signal_voltage(struct mmc *mmc, uint signal_voltage)
+{
+	mmc->signal_voltage = signal_voltage;
+	return mmc_set_ios(mmc);
 }
 
 static int mmc_select_hs_ddr(struct mmc *mmc)
@@ -1576,35 +1882,8 @@ static int mmc_startup(struct mmc *mmc)
 	/* Restrict card's capabilities by what the host can do */
 	mmc->card_caps &= mmc->cfg->host_caps;
 
-	if (IS_SD(mmc)) {
-		if (mmc->card_caps & MMC_MODE_4BIT) {
-			cmd.cmdidx = MMC_CMD_APP_CMD;
-			cmd.resp_type = MMC_RSP_R1;
-			cmd.cmdarg = mmc->rca << 16;
-
-			err = mmc_send_cmd(mmc, &cmd, NULL);
-			if (err)
-				return err;
-
-			cmd.cmdidx = SD_CMD_APP_SET_BUS_WIDTH;
-			cmd.resp_type = MMC_RSP_R1;
-			cmd.cmdarg = 2;
-			err = mmc_send_cmd(mmc, &cmd, NULL);
-			if (err)
-				return err;
-
-			mmc_set_bus_width(mmc, 4);
-		}
-
-		if (mmc->card_caps & MMC_MODE_HS) {
-			mmc_set_timing(mmc, MMC_TIMING_SD_HS);
-			mmc->tran_speed = 50000000;
-		} else {
-			mmc->tran_speed = 25000000;
-		}
-		mmc_set_clock(mmc, mmc->tran_speed);
-	} else if (mmc->version >= MMC_VERSION_4) {
-		mmc_set_clock(mmc, mmc->tran_speed);
+	if (mmc->version >= MMC_VERSION_4) {
+		mmc_set_clock(mmc, mmc->tran_speed, false);
 		if (mmc->timing == MMC_TIMING_MMC_HS200) {
 			err = mmc->cfg->ops->execute_tuning(mmc,
 						MMC_SEND_TUNING_BLOCK_HS200);
@@ -1752,9 +2031,46 @@ __weak void board_mmc_power_init(void)
 {
 }
 
+static void mmc_set_initial_state(struct mmc *mmc)
+{
+	int err;
+
+	/* First try to set 3.3V. If it fails set to 1.8V */
+	err = mmc_set_signal_voltage(mmc, MMC_SIGNAL_VOLTAGE_330);
+	if (err != 0)
+		err = mmc_set_signal_voltage(mmc, MMC_SIGNAL_VOLTAGE_180);
+	if (err != 0)
+		printf("failed to set signal voltage\n");
+
+	mmc_set_bus_width(mmc, 1);
+	mmc_set_clock(mmc, 1, false);
+	mmc_set_timing(mmc, MMC_TIMING_LEGACY);
+}
+
+static void mmc_power_up(struct mmc *mmc)
+{
+	mmc_set_vdd(mmc, true);
+	mmc_set_initial_state(mmc);
+	udelay(10000);
+}
+
+static void mmc_power_off(struct mmc *mmc)
+{
+	mmc_set_vdd(mmc, false);
+}
+
+static void mmc_power_cycle(struct mmc *mmc)
+{
+	mmc_power_off(mmc);
+	/* Wait at least 1 ms according to SD spec */
+	udelay(1000);
+	mmc_power_up(mmc);
+}
+
 int mmc_start_init(struct mmc *mmc)
 {
 	int err;
+	int uhs_en = true;
 
 	/* we pretend there's no card when init is NULL */
 	if (mmc_getcd(mmc) == 0 || mmc->cfg->ops->init == NULL) {
@@ -1780,9 +2096,9 @@ int mmc_start_init(struct mmc *mmc)
 		return err;
 
 	mmc->ddr_mode = 0;
-	mmc_set_bus_width(mmc, 1);
-	mmc_set_clock(mmc, 1);
-	mmc_set_timing(mmc, MMC_TIMING_LEGACY);
+
+retry:
+	mmc_power_cycle(mmc);
 
 	/* Reset the Card */
 	err = mmc_go_idle(mmc);
@@ -1797,7 +2113,11 @@ int mmc_start_init(struct mmc *mmc)
 	err = mmc_send_if_cond(mmc);
 
 	/* Now try to get the SD card's operating condition */
-	err = sd_send_op_cond(mmc);
+	err = sd_send_op_cond(mmc, uhs_en);
+	if (err == -EIO) {
+		uhs_en = false;
+		goto retry;
+	}
 
 	/* If the command timed out, we check for an MMC card */
 	if (err == TIMEOUT) {

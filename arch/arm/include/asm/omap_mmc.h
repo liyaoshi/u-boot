@@ -169,6 +169,11 @@ struct hsmmc {
 #define AC12_SCLK_SEL		(1 << 23)
 #define AC12_UHSMC_MASK			(7 << 16)
 #define AC12_UHSMC_SDR104		(3 << 16)
+#define AC12_UHSMC_SDR12		(0 << 16)
+#define AC12_UHSMC_SDR25		(1 << 16)
+#define AC12_UHSMC_SDR50		(2 << 16)
+#define AC12_UHSMC_SDR104		(3 << 16)
+#define AC12_UHSMC_DDR50		(4 << 16)
 #define AC12_UHSMC_RES			(0x7 << 16)
 
 /* Driver definitions */
@@ -211,6 +216,12 @@ struct hsmmc {
 #define INT_EN_MASK (IE_BADA | IE_CERR | IE_DEB | IE_DCRC |\
 		IE_DTO | IE_CIE | IE_CEB | IE_CCRC | IE_ADMAE | IE_CTO |\
 		IE_BRR | IE_BWR | IE_TC | IE_CC)
+
+#define CON_CLKEXTFREE		(1 << 16)
+#define CON_PADEN		(1 << 15)
+#define PSTATE_CLEV		(1 << 24)
+#define PSTATE_DLEV		(0xF << 20)
+#define PSTATE_DLEV_DAT0	(0x1 << 20)
 
 int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 		int wp_gpio);

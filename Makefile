@@ -659,6 +659,7 @@ libs-y += drivers/usb/musb-new/
 libs-y += drivers/usb/phy/
 libs-y += drivers/usb/ulpi/
 libs-y += drivers/usb/common/
+libs-y += drivers/rapidio/
 libs-y += cmd/
 libs-y += common/
 libs-$(CONFIG_API) += api/
@@ -809,6 +810,7 @@ ifneq ($(CONFIG_SYS_GENERIC_BOARD),y)
 	@echo "See doc/README.generic-board for further information"
 	@echo "===================================================="
 endif
+ifneq ($(CONFIG_OMAP),y)
 ifeq ($(CONFIG_DM_I2C_COMPAT),y)
 	@echo "===================== WARNING ======================"
 	@echo "This board uses CONFIG_DM_I2C_COMPAT. Please remove"
@@ -816,9 +818,12 @@ ifeq ($(CONFIG_DM_I2C_COMPAT),y)
 	@echo "before sending patches to the mailing list."
 	@echo "===================================================="
 endif
+endif
 
 PHONY += dtbs
-dtbs dts/dt.dtb: checkdtc u-boot
+dtbs: dts/dt.dtb
+	@:
+dts/dt.dtb: checkdtc u-boot
 	$(Q)$(MAKE) $(build)=dts dtbs
 
 quiet_cmd_copy = COPY    $@

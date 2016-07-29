@@ -105,8 +105,7 @@
 
 #define DFU_ALT_INFO_QSPI \
 	"dfu_alt_info_qspi=" \
-	"MLO raw 0x0 0x020000;" \
-	"MLO.backup1 raw 0x020000 0x020000;" \
+	"MLO raw 0x0 0x040000;" \
 	"u-boot.img raw 0x040000 0x0100000;" \
 	"u-boot-spl-os raw 0x140000 0x080000;" \
 	"u-boot-env raw 0x1C0000 0x010000;" \
@@ -175,7 +174,7 @@
 /* SPI */
 #undef	CONFIG_OMAP3_SPI
 #define CONFIG_TI_SPI_MMAP
-#define CONFIG_SF_DEFAULT_SPEED                64000000
+#define CONFIG_SF_DEFAULT_SPEED                76800000
 #define CONFIG_SF_DEFAULT_MODE                 SPI_MODE_0
 #define CONFIG_QSPI_QUAD_SUPPORT
 
@@ -186,8 +185,7 @@
 
 /*
  * Default to using SPI for environment, etc.
- * 0x000000 - 0x020000 : QSPI.SPL (128KiB)
- * 0x020000 - 0x020000 : QSPI.SPL.backup1 (128KiB)
+ * 0x000000 - 0x040000 : QSPI.SPL (256KiB)
  * 0x040000 - 0x140000 : QSPI.u-boot (1MiB)
  * 0x140000 - 0x1C0000 : QSPI.u-boot-spl-os (512KiB)
  * 0x1C0000 - 0x1D0000 : QSPI.u-boot-env (64KiB)
@@ -347,9 +345,10 @@
 #define CONFIG_EEPROM_CHIP_ADDRESS 0x50
 #define CONFIG_EEPROM_BUS_ADDRESS 0
 
-/* pcf support */
-#define CONFIG_PCF8575
-#define CONFIG_SYS_I2C_PCF8575_CHIP { {0x21, 0xeaf7} }
+/* PCF Support */
+#if defined(CONFIG_DM_GPIO) && defined(CONFIG_DM_I2C)
+#define CONFIG_PCF8575_GPIO
+#endif
 
 /* JAMR3 board pin mux */
 #define CONFIG_DRA7XX_JAMR3
