@@ -135,6 +135,7 @@
 					"androidboot.hardware=jacinto6evmboard"
 
 #ifdef CONFIG_SPL_BUILD
+#undef CONFIG_CMD_BOOTD
 #ifdef CONFIG_SPL_DFU_SUPPORT
 #define CONFIG_SPL_LOAD_FIT_ADDRESS 0x80200000
 #define CONFIG_SPL_ENV_SUPPORT
