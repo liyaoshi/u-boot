@@ -357,6 +357,7 @@
 #undef CONFIG_SYS_SPL_ARGS_ADDR
 #define CONFIG_SYS_SPL_ARGS_ADDR                0x82f80000
 
+#ifndef CONFIG_SPL_DFU_SUPPORT
 #ifndef CONFIG_PERIPHERAL_BOOT
 #define CONFIG_SPL_QSPI_OS_IN_MMC
 #define CONFIG_SPL_ANDROID_BOOT_SUPPORT
@@ -365,6 +366,7 @@
 #ifdef CONFIG_SPL_QSPI_OS_IN_MMC
 #define CONFIG_SPL_MMC_DTB_NAME "environment"
 #define CONFIG_SPL_MMC_KERNEL_NAME "boot"
+#endif
 #endif
 #endif
 
