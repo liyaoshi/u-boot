@@ -244,6 +244,7 @@
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DEFAULT_LINUX_BOOT_ENV \
 	DEFAULT_MMC_TI_ARGS \
+	DEFAULT_FIT_TI_ARGS \
 	"fdtfile=undefined\0" \
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
@@ -267,20 +268,6 @@
 		"root=${ramroot} " \
 		"rootfstype=${ramrootfstype}\0" \
 	"loadramdisk=load ${devtype} ${devnum} ${rdaddr} ramdisk.gz\0" \
-	"loadimage=load ${devtype} ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
-	"loadfdt=load ${devtype} ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile}\0" \
-	"mmcboot=mmc dev ${mmcdev}; " \
-		"setenv devnum ${mmcdev}; " \
-		"setenv devtype mmc; " \
-		"if mmc rescan; then " \
-			"echo SD/MMC found on device ${devnum};" \
-			"if run loadimage; then " \
-				"run loadfdt; " \
-				"echo Booting from mmc${mmcdev} ...; " \
-				"run args_mmc; " \
-				"bootz ${loadaddr} - ${fdtaddr}; " \
-			"fi;" \
-		"fi;\0" \
 	"usbboot=" \
 		"setenv devnum ${usbdev}; " \
 		"setenv devtype usb; " \
@@ -321,6 +308,9 @@
 	DFUARGS \
 
 #define CONFIG_BOOTCOMMAND \
+	"if test ${boot_fit} -eq 1; then "	\
+		"run update_to_fit;"	\
+	"fi;"	\
 	"run findfdt; " \
 	"run envboot;" \
 	"run mmcboot;" \
