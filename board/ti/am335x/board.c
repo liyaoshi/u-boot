@@ -25,6 +25,7 @@
 #include <asm/io.h>
 #include <asm/emif.h>
 #include <asm/gpio.h>
+#include <asm/omap_sec_common.h>
 #include <i2c.h>
 #include <miiphy.h>
 #include <cpsw.h>
@@ -66,10 +67,16 @@ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
 /*
  * Read header information from EEPROM into global structure.
  */
-static inline int __maybe_unused read_eeprom(void)
+#ifdef CONFIG_TI_I2C_BOARD_DETECT
+void do_board_detect(void)
 {
-	return ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR);
+	enable_i2c0_pin_mux();
+	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
+
+	if (ti_i2c_eeprom_am_get(-1, CONFIG_SYS_I2C_EEPROM_ADDR))
+		printf("ti_i2c_eeprom_init failed\n");
 }
+#endif
 
 #ifndef CONFIG_DM_SERIAL
 struct serial_device *default_serial_console(void)
@@ -250,9 +257,6 @@ void am33xx_spl_board_init(void)
 {
 	int mpu_vdd;
 
-	if (read_eeprom() < 0)
-		puts("Could not get board ID.\n");
-
 	/* Get the frequency */
 	dpll_mpu_opp100.m = am335x_get_efuse_mpu_max_freq(cdev);
 
@@ -390,11 +394,6 @@ void am33xx_spl_board_init(void)
 
 const struct dpll_params *get_dpll_ddr_params(void)
 {
-	enable_i2c0_pin_mux();
-	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
-	if (read_eeprom() < 0)
-		puts("Could not get board ID.\n");
-
 	if (board_is_evm_sk())
 		return &dpll_ddr_evm_sk;
 	else if (board_is_bone_lt() || board_is_icev2())
@@ -424,9 +423,6 @@ void set_uart_mux_conf(void)
 
 void set_mux_conf_regs(void)
 {
-	if (read_eeprom() < 0)
-		puts("Could not get board ID.\n");
-
 	enable_board_pin_mux();
 }
 
@@ -464,9 +460,6 @@ const struct ctrl_ioregs ioregs = {
 
 void sdram_init(void)
 {
-	if (read_eeprom() < 0)
-		puts("Could not get board ID.\n");
-
 	if (board_is_evm_sk()) {
 		/*
 		 * EVM SK 1.2A and later use gpio0_7 to enable DDR3.
@@ -658,12 +651,7 @@ int board_late_init(void)
 #endif
 
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
-	int rc;
 	char *name = NULL;
-
-	rc = read_eeprom();
-	if (rc)
-		puts("Could not get board ID.\n");
 
 	if (board_is_bbg1())
 		name = "BBG1";
@@ -802,9 +790,6 @@ int board_eth_init(bd_t *bis)
 	(defined(CONFIG_SPL_ETH_SUPPORT) && defined(CONFIG_SPL_BUILD))
 
 #ifdef CONFIG_DRIVER_TI_CPSW
-	if (read_eeprom() < 0)
-		puts("Could not get board ID.\n");
-
 	if (board_is_bone() || board_is_bone_lt() ||
 	    board_is_idk()) {
 		writel(MII_MODE_ENABLE, &cdev->miisel);
@@ -1014,5 +999,12 @@ enable_failed:
 	printf("Could not enable node %s: %s\n",
 	       path, fdt_strerror(ret));
 	return ret;
+}
+#endif
+
+#ifdef CONFIG_TI_SECURE_DEVICE
+void board_fit_image_post_process(void **p_image, size_t *p_size)
+{
+	secure_boot_verify_image(p_image, p_size);
 }
 #endif

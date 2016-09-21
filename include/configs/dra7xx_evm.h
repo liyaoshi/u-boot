@@ -374,4 +374,5 @@
 #define CONFIG_SPL_ENV_SUPPORT
 #endif
 
+#define CONFIG_DRA7XX_DWC1
 #endif /* __CONFIG_DRA7XX_EVM_H */

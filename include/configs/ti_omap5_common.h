@@ -189,6 +189,14 @@
  */
 #define CONFIG_SECURE_BOOT_SRAM 0x1000
 #define CONFIG_SPL_TEXT_BASE	0x40301350
+/* If no specific start address is specified then the secure EMIF
+ * region will be placed at the end of the DDR space. In order to prevent
+ * the main u-boot relocation from clobbering that memory and causing a
+ * firewall violation, we tell u-boot that memory is protected RAM (PRAM)
+ */
+#if (CONFIG_TI_SECURE_EMIF_REGION_START == 0)
+#define CONFIG_PRAM (CONFIG_TI_SECURE_EMIF_TOTAL_REGION_SIZE) >> 10
+#endif
 #else
 /*
  * For all booting on GP parts, the flash loader image is
@@ -198,7 +206,7 @@
 #endif
 
 /* DRA7xx/AM57xx have 512K of SRAM, OMAP5 only 128K */
-#if defined(CONFIG_DRA7XX) || defined(CONFIG_AM57XX)
+#if defined(CONFIG_DRA7XX)
 #define CONFIG_SPL_BOOT_END		0x4037E000
 #else
 #define CONFIG_SPL_BOOT_END		0x4031E000
