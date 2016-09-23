@@ -286,6 +286,8 @@ static int mmc_load_image_raw_os(struct mmc *mmc)
 	unsigned long count;
 	int ret;
 	lbaint_t sector, num_sectors;
+	char *boot_ptn;
+
 #if defined(CONFIG_SPL_MMC_DTB_NAME) || defined(CONFIG_SPL_MMC_KERNEL_NAME)
 	disk_partition_t info;
 #endif
@@ -319,8 +321,20 @@ static int mmc_load_image_raw_os(struct mmc *mmc)
 	}
 
 #ifdef CONFIG_SPL_MMC_KERNEL_NAME
+	boot_ptn = getenv("reboot_image");
+	if (boot_ptn && !strcmp(boot_ptn, "recovery")) {
+		setenv("reboot_image", "boot");
+#ifdef CONFIG_SPL_SAVEENV
+		saveenv();
+#endif
+		boot_ptn = strdup("recovery");
+	} else {
+		boot_ptn = strdup(CONFIG_SPL_MMC_KERNEL_NAME);
+	}
+
+	printf("Booting from %s partition\n", boot_ptn);
 	ret = part_get_info_efi_by_name(&mmc->block_dev,
-					     CONFIG_SPL_MMC_KERNEL_NAME,
+					     boot_ptn,
 					     &info);
 	if (ret) {
 #ifdef CONFIG_SPL_LIBCOMMON_SUPPORT
