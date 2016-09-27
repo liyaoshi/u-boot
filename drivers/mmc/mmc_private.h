@@ -20,17 +20,16 @@ extern int mmc_set_blocklen(struct mmc *mmc, int len);
 void mmc_adapter_card_type_ident(void);
 #endif
 
-#ifndef CONFIG_SPL_BUILD
-
+#if !(defined(CONFIG_SPL_BUILD) && !defined(CONFIG_SPL_SAVEENV))
 unsigned long mmc_berase(struct blk_desc *block_dev, lbaint_t start,
 			 lbaint_t blkcnt);
 
 unsigned long mmc_bwrite(struct blk_desc *block_dev, lbaint_t start,
 			 lbaint_t blkcnt, const void *src);
 
-#else /* CONFIG_SPL_BUILD */
+#else /* CONFIG_SPL_BUILD  and CONFIG_SPL_SAVEENV is not defined */
 
-/* SPL will never write or erase, declare dummies to reduce code size. */
+/* declare dummies to reduce code size. */
 
 static inline unsigned long mmc_berase(struct blk_desc *block_dev,
 				       lbaint_t start, lbaint_t blkcnt)

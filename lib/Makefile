@@ -49,6 +49,7 @@ obj-$(CONFIG_BITREVERSE) += bitrev.o
 obj-y += list_sort.o
 endif
 
+obj-$(CONFIG_SPL_SAVEENV) += qsort.o
 obj-$(CONFIG_$(SPL_)OF_LIBFDT) += libfdt/
 ifdef CONFIG_SPL_OF_CONTROL
 obj-$(CONFIG_OF_LIBFDT) += libfdt/
