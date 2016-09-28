@@ -207,7 +207,7 @@ static unsigned char mmc_board_init(struct mmc *mmc)
 		&prcm_base->iclken1_core);
 #endif
 
-#if defined(CONFIG_OMAP54XX) && defined(CONFIG_OMAP44XX)
+#if defined(CONFIG_OMAP54XX) || defined(CONFIG_OMAP44XX)
 	/* PBIAS config needed for MMC1 only */
 	if (mmc->block_dev.devnum == 0)
 		vmmc_pbias_config(LDO_VOLT_3V0);
@@ -802,7 +802,7 @@ static int omap_hsmmc_adma_desc(struct mmc *mmc, char *buf, u16 len, bool end)
 static int omap_hsmmc_prepare_adma_table(struct mmc *mmc, struct mmc_data *data)
 {
 	uint total_len = data->blocksize * data->blocks;
-	uint desc_count = (total_len / ADMA_MAX_LEN) + 1;
+	uint desc_count = DIV_ROUND_UP(total_len, ADMA_MAX_LEN);
 	struct omap_hsmmc_data *priv = (struct omap_hsmmc_data *)mmc->priv;
 	int i = desc_count;
 	char *buf;
