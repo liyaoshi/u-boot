@@ -86,6 +86,7 @@
 	"loadimage=load mmc ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
 	"mmcboot=" \
 		"if mmc dev ${mmcdev}; then " \
+			"setenv devtype mmc; " \
 			"if mmc rescan; then " \
 				"echo SD/MMC found on device ${mmcdev};" \
 				"if run loadimage; then " \
