@@ -52,6 +52,8 @@ typedef volatile unsigned int   *dv_reg_p;
 #define KS2_DDRPHY_ZQ2CR1_OFFSET        0x1A4
 #define KS2_DDRPHY_ZQ3CR1_OFFSET        0x1B4
 
+#define KS2_DDRPHY_DATX8_2_OFFSET       0x240
+#define KS2_DDRPHY_DATX8_3_OFFSET       0x280
 #define KS2_DDRPHY_DATX8_4_OFFSET       0x2C0
 #define KS2_DDRPHY_DATX8_5_OFFSET       0x300
 #define KS2_DDRPHY_DATX8_6_OFFSET       0x340
@@ -70,6 +72,7 @@ typedef volatile unsigned int   *dv_reg_p;
 #define PDQ_MASK                        0x00000070
 #define NOSRA_MASK                      0x08000000
 #define ECC_MASK                        0x00000001
+#define DXEN_MASK                       0x00000001
 
 /* DDR3 definitions */
 #define KS2_DDR3A_EMIF_CTRL_BASE	0x21010000
@@ -131,6 +134,22 @@ typedef volatile unsigned int   *dv_reg_p;
 #else
 #define KS2_NETCP_PDMA_RX_FREE_QUEUE	4001
 #define KS2_NETCP_PDMA_RX_RCV_QUEUE	4002
+#endif
+
+/* 10gbe NETCP pktdma */
+#if defined(CONFIG_SOC_K2HK) || defined(CONFIG_SOC_K2E)
+#define KS2_NETCPX_PDMA_CTRL_BASE	0x02fa1000
+#define KS2_NETCPX_PDMA_TX_BASE		0x02fa1400
+#define KS2_NETCPX_PDMA_TX_CH_NUM	8
+#define KS2_NETCPX_PDMA_RX_BASE		0x02fa1800
+#define KS2_NETCPX_PDMA_RX_CH_NUM	16
+#define KS2_NETCPX_PDMA_SCHED_BASE	0x02fa1c00
+#define KS2_NETCPX_PDMA_RX_FLOW_BASE	0x02fa2000
+#define KS2_NETCPX_PDMA_RX_FLOW_NUM	16
+#define KS2_NETCPX_PDMA_DEST_PORT_INFO	TAG_INFO
+
+#define KS2_LANES_PER_XGMII_SERDES	2
+#define KS2_XGMII_SERDES_BASE		0x0231e000
 #endif
 
 /* Chip Interrupt Controller */
@@ -281,8 +300,11 @@ typedef volatile unsigned int   *dv_reg_p;
 #define KS2_QM_MANAGER_Q_PROXY_BASE	0x04040200
 #define KS2_QM_QUEUE_STATUS_BASE	0x04100000
 #define KS2_QM_LINK_RAM_BASE		0x04020000
+#define KS2_QM_LINK_RAM_SIZE		0x7ff
 #define KS2_QM_REGION_NUM		8
 #define KS2_QM_QPOOL_NUM		112
+#define KS2_QM_QUEUES_PER_QMGR		128
+#define KS2_QM_QS_PER_LOGICAL_QM	128
 #else
 #define KS2_QM_BASE_ADDRESS		0x23a80000
 #define KS2_QM_CONF_BASE		0x02a02000
@@ -296,8 +318,30 @@ typedef volatile unsigned int   *dv_reg_p;
 #define KS2_QM_MANAGER_Q_PROXY_BASE	0x02ac0000
 #define KS2_QM_QUEUE_STATUS_BASE	0x02a40000
 #define KS2_QM_LINK_RAM_BASE		0x00100000
+#define KS2_QM_LINK_RAM_SIZE		0x7fff
 #define KS2_QM_REGION_NUM		64
 #define KS2_QM_QPOOL_NUM		4000
+#define KS2_QM_QUEUES_PER_QMGR		8192
+#define KS2_QM_QS_PER_LOGICAL_QM	4096
+#endif
+
+#ifdef CONFIG_SOC_K2HK
+#define KS2_QM2_QUEUE_STATUS_BASE	0x02a60000
+#define KS2_QM2_MANAGER_QUEUES_BASE	0x02aa0000
+#define KS2_QM2_BASE_ADDRESS		0x23aa0000
+#define KS2_QM2_LINK_RAM_BASE		0x00100000
+#define KS2_QM2_MANAGER_Q_PROXY_BASE	0x02ad0000
+#define KS2_QM2_STATUS_RAM_BASE		0x02a06400
+#define KS2_QM2_CONF_BASE		0x02a04000
+#define KS2_QM2_INTD_CONF_BASE		0x02a0d000
+#define KS2_QM2_DESC_SETUP_BASE		0x02a05000
+#define KS2_QM2_REGION_NUM		64
+#define KS2_QM2_PDSP1_CMD_BASE		0x02a24000
+#define KS2_QM2_PDSP1_CTRL_BASE		0x02a0f100
+#define KS2_QM2_PDSP1_IRAM_BASE		0x02a11000
+#define KS2_QM2_LINK_RAM_SIZE		0x7fff
+#define KS2_QM2_QUEUES_PER_QMGR		8192
+#define KS2_QM2_QPOOL_NUM		9028
 #endif
 
 /* USB */

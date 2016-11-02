@@ -12,6 +12,7 @@
 #include <asm/arch/psc_defs.h>
 #include <asm/arch/mmc_host_def.h>
 #include "mux-k2g.h"
+#include "../common/board_detect.h"
 
 #define SYS_CLK		24000000
 
@@ -110,8 +111,11 @@ int board_mmc_init(bd_t *bis)
 		return -1;
 	}
 
-	omap_mmc_init(0, 0, 0, -1, -1);
+	if (board_is_k2g_gp())
+		omap_mmc_init(0, 0, 0, -1, -1);
+
 	omap_mmc_init(1, 0, 0, -1, -1);
+
 	return 0;
 }
 #endif
@@ -139,14 +143,40 @@ int board_early_init_f(void)
 
 	k2g_reset_mux_config();
 
-	/* deassert FLASH_HOLD */
-	clrbits_le32(K2G_GPIO1_BANK2_BASE + K2G_GPIO_DIR_OFFSET,
-		     BIT(9));
-	setbits_le32(K2G_GPIO1_BANK2_BASE + K2G_GPIO_SETDATA_OFFSET,
-		     BIT(9));
+	if (board_is_k2g_gp()) {
+		/* deassert FLASH_HOLD */
+		clrbits_le32(K2G_GPIO1_BANK2_BASE + K2G_GPIO_DIR_OFFSET,
+			     BIT(9));
+		setbits_le32(K2G_GPIO1_BANK2_BASE + K2G_GPIO_SETDATA_OFFSET,
+			     BIT(9));
 
-	if (psc_enable_module(KS2_LPSC_GPMC))
-		printf("%s can't enable gpmc\n", __func__);
+		if (psc_enable_module(KS2_LPSC_GPMC))
+			printf("%s can't enable gpmc\n", __func__);
+	}
+	return 0;
+}
+#endif
+
+#ifdef CONFIG_BOARD_LATE_INIT
+int board_late_init(void)
+{
+	__maybe_unused int rc;
+
+#ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
+	if (board_is_k2g_gp())
+		setenv("board_name", "66AK2GGP\0");
+	else if (board_is_k2g_ice())
+		setenv("board_name", "66AK2GIC\0");
+#endif
+
+#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_TI_I2C_BOARD_DETECT)
+	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
+			CONFIG_EEPROM_CHIP_ADDRESS);
+	if (rc)
+		printf("ti_i2c_eeprom_init failed %d\n", rc);
+
+	board_ti_set_ethaddr(1);
+#endif
 
 	return 0;
 }

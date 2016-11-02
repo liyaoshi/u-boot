@@ -24,12 +24,15 @@
 	status = "okay";
 	ethphy0: ethernet-phy@0 {
 		reg = <0>;
-		phy-mode = "rgmii-id";
 	};
 };
 
 &gbe0 {
 	phy-handle = <&ethphy0>;
+};
+
+&netcp {
+	status = "okay";
 };
 
 &spi1 {

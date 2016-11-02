@@ -98,7 +98,7 @@ struct ti_common_eeprom {
 };
 
 #define TI_EEPROM_DATA ((struct ti_common_eeprom *)\
-				OMAP_SRAM_SCRATCH_BOARD_EEPROM_START)
+				TI_SRAM_SCRATCH_BOARD_EEPROM_START)
 
 /**
  * ti_i2c_eeprom_am_get() - Consolidated eeprom data collection for AM* TI EVMs
@@ -141,7 +141,7 @@ bool board_ti_rev_is(char *rev_tag, int cmp_len);
 /**
  * board_ti_get_rev() - Get board revision for TI EVMs
  *
- * Return: NULL if eeprom was'nt read.
+ * Return: Empty string if eeprom was'nt read.
  *	   Board revision otherwise
  */
 char *board_ti_get_rev(void);
@@ -149,7 +149,7 @@ char *board_ti_get_rev(void);
 /**
  * board_ti_get_config() - Get board config for TI EVMs
  *
- * Return: NULL if eeprom was'nt read.
+ * Return: Empty string if eeprom was'nt read.
  *	   Board config otherwise
  */
 char *board_ti_get_config(void);
@@ -157,7 +157,7 @@ char *board_ti_get_config(void);
 /**
  * board_ti_get_name() - Get board name for TI EVMs
  *
- * Return: NULL if eeprom was'nt read.
+ * Return: Empty string if eeprom was'nt read.
  *	   Board name otherwise
  */
 char *board_ti_get_name(void);
@@ -209,5 +209,17 @@ void set_board_info_env(char *name);
  * Return: 0 if all went fine, else return error.
  */
 int ti_i2c_eeprom_am_set(const char *name, const char *rev);
+
+/**
+ * board_ti_set_ethaddr- Sets the ethaddr environment from EEPROM
+ * @index: The first eth<index>addr environment variable to set
+ *
+ * EEPROM should be already read before calling this function.
+ * The EEPROM contains 2 MAC addresses which define the MAC address
+ * range (i.e. first and last MAC address).
+ * This function sets the ethaddr environment variable for all
+ * the available MAC addresses starting from eth<index>addr.
+ */
+void __maybe_unused board_ti_set_ethaddr(int index);
 
 #endif	/* __BOARD_DETECT_H */

@@ -71,7 +71,13 @@ struct qm_config {
 	u32	pdsp_iram;
 	/* QM configuration parameters */
 
-	u32	qpool_num;	/* */
+	u32	i_lram_size;	/* internal linking RAM	size */
+	u32	start_queue;
+	u32	num_queues;
+	u32	qpool_num;
+	u32	desc_pool_base;
+	u32	desc_pool_size;
+	u32	num_desc;
 };
 
 struct qm_host_desc {
@@ -91,7 +97,9 @@ struct qm_host_desc {
 #define HDESC_NUM        256
 
 int	qm_init(void);
+int	qm2_init(void);
 void	qm_close(void);
+void	qm2_close(void);
 void	qm_push(struct qm_host_desc *hd, u32 qnum);
 struct qm_host_desc *qm_pop(u32 qnum);
 
@@ -152,6 +160,11 @@ struct rx_flow_regs {
 	u32	thresh[3];
 };
 
+enum dest_port_info {
+	PKT_INFO,
+	TAG_INFO
+};
+
 struct pktdma_cfg {
 	struct global_ctl_regs	*global;
 	struct tx_chan_regs	*tx_ch;
@@ -167,9 +180,12 @@ struct pktdma_cfg {
 	u32			tx_snd_q;
 
 	u32			rx_flow; /* flow that is used for RX */
+	enum dest_port_info	dest_port_info; /* flag where is dest port */
+	u32			qpool_num;
 };
 
 extern struct pktdma_cfg netcp_pktdma;
+extern struct pktdma_cfg netcpx_pktdma;
 
 /*
  * packet dma user allocates memory for rx buffers
@@ -184,7 +200,8 @@ struct rx_buff_desc {
 
 int ksnav_close(struct pktdma_cfg *pktdma);
 int ksnav_init(struct pktdma_cfg *pktdma, struct rx_buff_desc *rx_buffers);
-int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt, int num_bytes, u32 swinfo2);
+int ksnav_send(struct pktdma_cfg *pktdma, u32 *pkt,
+	       int num_bytes, u32 dest_port);
 void *ksnav_recv(struct pktdma_cfg *pktdma, u32 **pkt, int *num_bytes);
 void ksnav_release_rxhd(struct pktdma_cfg *pktdma, void *hd);
 

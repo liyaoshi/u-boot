@@ -11,6 +11,7 @@
 #include <asm/io.h>
 #include <asm/arch/mux-k2g.h>
 #include <asm/arch/hardware.h>
+#include "board.h"
 
 struct pin_cfg k2g_evm_pin_cfg[] = {
 	/* GPMC */
@@ -307,7 +308,66 @@ struct pin_cfg k2g_evm_pin_cfg[] = {
 	{ MAX_PIN_N, }
 };
 
+struct pin_cfg k2g_ice_evm_pin_cfg[] = {
+	/* MMC 1 */
+	{ 63, MODE(0) | PIN_PTD },	/* MMC1_DAT3.MMC1_DAT3 */
+	{ 64, MODE(0) | PIN_PTU },	/* MMC1_DAT2.MMC1_DAT2 */
+	{ 65, MODE(0) | PIN_PTU },	/* MMC1_DAT1.MMC1_DAT1 */
+	{ 66, MODE(0) | PIN_PTD },	/* MMC1_DAT0.MMC1_DAT0 */
+	{ 67, MODE(0) | PIN_PTD },	/* MMC1_CLK.MMC1_CLK   */
+	{ 68, MODE(0) | PIN_PTD },	/* MMC1_CMD.MMC1_CMD   */
+	{ 69, MODE(3) | PIN_PTU },	/* MMC1_SDCD.GPIO0_69  */
+	{ 70, MODE(0) | PIN_PTU },	/* MMC1_SDWP.MMC1_SDWP */
+	{ 71, MODE(0) | PIN_PTD },	/* MMC1_POW.MMC1_POW   */
+
+	/* RGMII */
+	{ 85, MODE(1) },		/* MII_TXCLK.RGMII_TXC  */
+	{ 72, MODE(1) },		/* MII_RXCLK.RGMII_RXC  */
+	{ 77, MODE(1) | PIN_PDIS},	/* MII_RXD3.RGMII_RXD3  */
+	{ 78, MODE(1) | PIN_PDIS},	/* MII_RXD2.RGMII_RXD2  */
+	{ 79, MODE(1) | PIN_PDIS},	/* MII_RXD1.RGMII_RXD1  */
+	{ 80, MODE(1) | PIN_PDIS},	/* MII_RXD0.RGMII_RXD0  */
+	{ 81, MODE(1) | PIN_PDIS},	/* MII_RXDV.RGMII_RXCTL */
+	{ 91, MODE(1) },		/* MII_TXD3.RGMII_TXD3  */
+	{ 92, MODE(1) },		/* MII_TXD2.RGMII_TXD2  */
+	{ 93, MODE(1) },		/* MII_TXD1.RGMII_TXD1  */
+	{ 94, MODE(1) },		/* MII_TXD0.RGMII_TXD0  */
+	{ 95, MODE(1) },		/* MII_TXEN.RGMII_TXCTL */
+	{ 98, MODE(0) },		/* MDIO_DATA.MDIO_DATA  */
+	{ 99, MODE(0) },		/* MDIO_CLK.MDIO_CLK    */
+	{ 10, MODE(3) },		/* GPMC_AD10.GPIO0_10   */
+
+	/* I2C 0 */
+	{ 223, MODE(0) | PIN_PDIS },	/* I2C0_SCL.I2C0_SCL */
+	{ 224, MODE(0) | PIN_PDIS },	/* I2C0_SDA.I2C0_SDA */
+
+	/* UART 0 */
+	{ 115, MODE(0) | PIN_PTD },	/* UART0_RXD.UART0_RXD */
+	{ 116, MODE(0) | PIN_PTD },	/* UART0_TXD.UART0_TXD */
+
+	/* QSPI */
+	{ 129,	MODE(0) | PIN_PDIS },	/* QSPI_CLK.QSPI_CLK */
+	{ 130,	MODE(0) | PIN_PDIS},	/* QSPI_RCLK.QSPI_RCLK */
+	{ 131,	MODE(0) | PIN_PDIS},	/* QSPI_D0.QSPI_D0 */
+	{ 132,	MODE(0) | PIN_PDIS},	/* QSPI_D1.QSPI_D1 */
+	{ 133,	MODE(0) | PIN_PDIS},	/* QSPI_D2.QSPI_D2 */
+	{ 134,	MODE(0) | PIN_PDIS},	/* QSPI_D3.QSPI_D3 */
+	{ 135,	MODE(0) | PIN_PDIS},	/* QSPI_CSN0.QSPI_CSN0 */
+
+	/* ICSS1 Padconf Workaround */
+	{ 202, MODE(1) | PIN_PDIS },    /* PR1_PRU1_GPO1.PR1_PRU1_GPI1 (PR1_MII1_RXD1) */
+
+	{ MAX_PIN_N, }
+};
+
 void k2g_mux_config(void)
 {
-	configure_pin_mux(k2g_evm_pin_cfg);
+	if (board_is_k2g_gp()) {
+		configure_pin_mux(k2g_evm_pin_cfg);
+	} else if (board_is_k2g_ice()) {
+		configure_pin_mux(k2g_ice_evm_pin_cfg);
+	} else {
+		puts("Unknown board, cannot configure pinmux.");
+		hang();
+	}
 }
