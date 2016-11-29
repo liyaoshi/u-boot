@@ -143,6 +143,8 @@
 #define CONFIG_SPL_LOAD_FIT_ADDRESS 0x80200000
 #define CONFIG_SPL_ENV_SUPPORT
 #define CONFIG_SPL_HASH_SUPPORT
+
+#ifdef CONFIG_SPL_LOAD_FIT
 #define DFU_ALT_INFO_RAM \
 	"dfu_alt_info_ram=" \
 	"kernel ram 0x80200000 0x4000000;" \
@@ -151,6 +153,16 @@
 #define DFUARGS \
 	"dfu_bufsiz=0x10000\0" \
 	DFU_ALT_INFO_RAM
+#else
+#define DFU_ALT_INFO_RAM \
+	"dfu_alt_info_ram=" \
+	"kernel ram 0x807fffc0 0x4000000;" \
+	"fdt ram 0x80f80000 0x80000;" \
+	"ramdisk ram 0x81000000 0x4000000\0"
+#define DFUARGS \
+	"dfu_bufsiz=0x10000\0" \
+	DFU_ALT_INFO_RAM
+#endif
 #endif
 #endif
 
@@ -204,8 +216,6 @@
 /* In SPL, use the environment and discard MMC support for space. */
 #ifdef CONFIG_SPL_BUILD
 #undef CONFIG_SPL_MMC_SUPPORT
-#undef CONFIG_SPL_MAX_SIZE
-#define CONFIG_SPL_MAX_SIZE             (256 << 10) /* 256 KiB */
 #endif
 #define CONFIG_SPL_ENV_SUPPORT
 #define CONFIG_ENV_IS_IN_SPI_FLASH
