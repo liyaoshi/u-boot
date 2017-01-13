@@ -622,12 +622,10 @@ static void fastboot_update_bootloader(char *cmd)
 	reset_fastboot_cmd();
 
 	if (strncmp("xloader", cmd, 7) == 0) {
-		printf("%s:xloader\n", __func__);
 		sprintf(cmdbuf, "sf write 0x%x 0 40000",
 			(unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
 		add_fastboot_cmd(0, cmdbuf);
 	} else if (strncmp("bootloader", cmd, 10) == 0) {
-		printf("%s:bootloader\n", __func__);
 		sprintf(cmdbuf, "sf write 0x%x 40000 100000",
 			(unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
 		add_fastboot_cmd(0, cmdbuf);
