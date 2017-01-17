@@ -160,6 +160,11 @@
 #define DRA7_RPROC_CMA_SIZE_DSP1             0x04000000
 #define DRA7_RPROC_CMA_SIZE_DSP2             0x00800000
 
+#define DRA7_PGTBL_BASE_IPU1                 0xbfc00000
+#define DRA7_PGTBL_BASE_IPU2                 0xbfc08000
+#define DRA7_PGTBL_BASE_DSP1                 0xbfc10000
+#define DRA7_PGTBL_BASE_DSP2                 0xbfc18000
+
 /*
  * The page table (32 KB) is placed at the end of the CMA reserved area.
  * It's possible that this location is needed by the firmware (in which
@@ -1103,7 +1108,7 @@ struct rproc ipu1_config = {
 	.num_iommus = 1,
 	.cma_base = DRA7_RPROC_CMA_BASE_IPU1,
 	.cma_size = DRA7_RPROC_CMA_SIZE_IPU1,
-	.page_table_addr = 0,
+	.page_table_addr = DRA7_PGTBL_BASE_IPU1,
 	.mmu_base_addr = {0x58882000, 0},
 	.load_addr = IPU1_LOAD_ADDR,
 	.core_name = "IPU1",
@@ -1124,7 +1129,7 @@ struct rproc ipu2_config = {
 	.num_iommus = 1,
 	.cma_base = DRA7_RPROC_CMA_BASE_IPU2,
 	.cma_size = DRA7_RPROC_CMA_SIZE_IPU2,
-	.page_table_addr = 0,
+	.page_table_addr = DRA7_PGTBL_BASE_IPU2,
 	.mmu_base_addr = {0x55082000, 0},
 	.load_addr = IPU2_LOAD_ADDR,
 	.core_name = "IPU2",
@@ -1145,7 +1150,7 @@ struct rproc dsp1_config = {
 	.num_iommus = 2,
 	.cma_base = DRA7_RPROC_CMA_BASE_DSP1,
 	.cma_size = DRA7_RPROC_CMA_SIZE_DSP1,
-	.page_table_addr = 0,
+	.page_table_addr = DRA7_PGTBL_BASE_DSP1,
 	.mmu_base_addr = {0x40D01000, 0x40D02000},
 	.load_addr = DSP1_LOAD_ADDR,
 	.core_name = "DSP1",
@@ -1166,7 +1171,7 @@ struct rproc dsp2_config = {
 	.num_iommus = 2,
 	.cma_base = DRA7_RPROC_CMA_BASE_DSP2,
 	.cma_size = DRA7_RPROC_CMA_SIZE_DSP2,
-	.page_table_addr = 0,
+	.page_table_addr = DRA7_PGTBL_BASE_DSP2,
 	.mmu_base_addr = {0x41501000, 0x41502000},
 	.load_addr = DSP2_LOAD_ADDR,
 	.core_name = "DSP2",
@@ -1217,10 +1222,6 @@ u32 spl_boot_core(u32 core_id)
 	/* Clock the remote core */
 	if (cfg->start_clocks)
 		cfg->start_clocks(core_id, cfg);
-
-	/* Calculate the page table address */
-	cfg->page_table_addr =
-	    cfg->cma_base + cfg->cma_size - (PAGE_TABLE_SIZE);
 
 	debug("Configuring IOMMU\n");
 
