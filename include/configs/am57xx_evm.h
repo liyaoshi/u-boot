@@ -163,6 +163,8 @@
 #define CONFIG_OMAP_USB_PHY
 #define CONFIG_OMAP_USB3PHY1_HOST
 
+#define CONFIG_USB_FUNCTION_MASS_STORAGE
+
 /* USB Device Firmware Update support */
 #define CONFIG_USB_FUNCTION_DFU
 #define CONFIG_DFU_RAM
