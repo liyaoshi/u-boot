@@ -63,7 +63,7 @@ static ulong spl_spi_fit_read(struct spl_load_info *load, ulong sector,
  */
 int spl_spi_load_image(void)
 {
-	int err = 0;
+	int err = 1;
 	struct spi_flash *flash;
 	struct image_header *header;
 
