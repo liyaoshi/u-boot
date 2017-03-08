@@ -64,7 +64,8 @@ static struct f_fastboot *fastboot_func;
 static unsigned int fastboot_flash_session_id;
 static unsigned int download_size;
 static unsigned int download_bytes;
-static char f_cmdbuf[MAX_CMDS][32];
+#define FB_MAX_CMD_LEN (32)
+static char f_cmdbuf[MAX_CMDS][FB_MAX_CMD_LEN];
 static int flash_spi;
 
 static struct usb_endpoint_descriptor fs_ep_in = {
@@ -618,16 +619,16 @@ static int fastboot_update_zimage(void);
 
 static void fastboot_update_bootloader(char *cmd)
 {
-	char cmdbuf[32];
+	char cmdbuf[FB_MAX_CMD_LEN];
 	reset_fastboot_cmd();
 
 	if (strncmp("xloader", cmd, 7) == 0) {
-		sprintf(cmdbuf, "sf write 0x%x 0 40000",
-			(unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
+		snprintf(cmdbuf, FB_MAX_CMD_LEN, "sf write 0x%x 0 40000",
+			 (unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
 		add_fastboot_cmd(0, cmdbuf);
 	} else if (strncmp("bootloader", cmd, 10) == 0) {
-		sprintf(cmdbuf, "sf write 0x%x 40000 100000",
-			(unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
+		snprintf(cmdbuf, FB_MAX_CMD_LEN, "sf write 0x%x 40000 100000",
+			 (unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
 		add_fastboot_cmd(0, cmdbuf);
 	}
 	run_fastboot_cmd();
@@ -821,7 +822,7 @@ static void cb_flash(struct usb_ep *ep, struct usb_request *req)
 static void cb_oem(struct usb_ep *ep, struct usb_request *req)
 {
 	char *cmd = req->buf;
-	char cmdbuf[32];
+	char cmdbuf[FB_MAX_CMD_LEN];
 
 	reset_fastboot_cmd();
 
