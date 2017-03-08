@@ -623,11 +623,11 @@ static void fastboot_update_bootloader(char *cmd)
 	reset_fastboot_cmd();
 
 	if (strncmp("xloader", cmd, 7) == 0) {
-		snprintf(cmdbuf, FB_MAX_CMD_LEN, "sf write 0x%x 0 40000",
+		snprintf(cmdbuf, FB_MAX_CMD_LEN, "sf update 0x%x 0 40000",
 			 (unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
 		add_fastboot_cmd(0, cmdbuf);
 	} else if (strncmp("bootloader", cmd, 10) == 0) {
-		snprintf(cmdbuf, FB_MAX_CMD_LEN, "sf write 0x%x 40000 100000",
+		snprintf(cmdbuf, FB_MAX_CMD_LEN, "sf update 0x%x 40000 100000",
 			 (unsigned int)CONFIG_FASTBOOT_BUF_ADDR);
 		add_fastboot_cmd(0, cmdbuf);
 	}
@@ -839,8 +839,6 @@ static void cb_oem(struct usb_ep *ep, struct usb_request *req)
 	} else if (strncmp("spi", cmd + 4, 3) == 0) {
 		flash_spi = 1;
 		add_fastboot_cmd(0, "sf probe 0");
-		add_fastboot_cmd(1, "sf erase 0 0x40000");
-		add_fastboot_cmd(2, "sf erase 0x40000 0x100000");
 	} else if (strncmp("unlock", cmd + 4, 8) == 0) {
 		fastboot_tx_write_str("FAILnot implemented");
 		return ;
