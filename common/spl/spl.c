@@ -58,7 +58,7 @@ __weak int spl_start_uboot(void)
 
 void spl_fixup_fdt(void)
 {
-#ifdef CONFIG_SPL_OF_LIBFDT
+#if defined(CONFIG_SPL_OF_LIBFDT) && defined(CONFIG_SYS_SPL_ARGS_ADDR)
 	void *fdt_blob = (void *)CONFIG_SYS_SPL_ARGS_ADDR;
 	int err;
 
