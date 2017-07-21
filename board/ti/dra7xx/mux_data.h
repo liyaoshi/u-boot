@@ -1110,6 +1110,19 @@ const struct pad_conf_entry dra76x_core_padconf_array[] = {
 	{WAKEUP2, (M1 | PIN_OUTPUT)},	/* N/A.sys_nirq2 */
 	{WAKEUP3, (M1 | PIN_OUTPUT)},	/* N/A.sys_nirq1 */
 #ifdef CONFIG_DRA7XX_JAMR3
+	{VIN1A_CLK0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_clk0.vin1a_clk0 */
+	{VIN1A_DE0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_de0.vin1a_de0 */
+	{VIN1A_FLD0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_fld0.vin1a_fld0 */
+	{VIN1A_HSYNC0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_hsync0.vin1a_hsync0 */
+	{VIN1A_VSYNC0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_vsync0.vin1a_vsync0 */
+	{VIN1A_D0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d0.vin1a_d0 */
+	{VIN1A_D1, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d1.vin1a_d1 */
+	{VIN1A_D2, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d2.vin1a_d2 */
+	{VIN1A_D3, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d3.vin1a_d3 */
+	{VIN1A_D4, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d4.vin1a_d4 */
+	{VIN1A_D5, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d5.vin1a_d5 */
+	{VIN1A_D6, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d6.vin1a_d6 */
+	{VIN1A_D7, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d7.vin1a_d7 */
 	{XREF_CLK1, (M5 | PIN_INPUT_PULLDOWN)},	/* xref_clk1.atl_clk1 */
 	{XREF_CLK3, (M14 | PIN_INPUT)},	/* xref_clk3.gpio6_20 */
 	{MCASP1_AXR8, (M1 | PIN_OUTPUT_PULLDOWN | SLEWCONTROL)},	/* mcasp1_axr8.mcasp6_axr0 */
