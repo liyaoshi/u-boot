@@ -497,6 +497,12 @@ int get_l2_pg_tbl_addr(unsigned int virt, unsigned int *pg_tbl_addr)
 		ret = 0;
 	}
 
+	if ((match_found == 0) && (i >= MAX_NUM_L2_PAGE_TABLES)) {
+		printf("Insufficient number of L2 page table entries\n");
+		printf("number of entries currently allowed is %d\n",
+		       MAX_NUM_L2_PAGE_TABLES);
+	}
+
 	return ret;
 }
 
