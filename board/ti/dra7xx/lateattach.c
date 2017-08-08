@@ -161,11 +161,6 @@
 #define DRA7_RPROC_CMA_SIZE_DSP1             0x04000000
 #define DRA7_RPROC_CMA_SIZE_DSP2             0x00800000
 
-#define DRA7_PGTBL_BASE_IPU1                 0xbfc00000
-#define DRA7_PGTBL_BASE_IPU2                 0xbfc08000
-#define DRA7_PGTBL_BASE_DSP1                 0xbfc10000
-#define DRA7_PGTBL_BASE_DSP2                 0xbfc18000
-
 /*
  * The page table (32 KB) is placed at the end of the CMA reserved area.
  * It's possible that this location is needed by the firmware (in which
@@ -200,6 +195,15 @@
 	((nbits) % BITS_PER_LONG) ?                                     \
 		(1UL<<((nbits) % BITS_PER_LONG))-1 : ~0UL               \
 )
+
+#define DRA7_PGTBL_BASE_ADDR                 0xbfc00000
+#define DRA7_PGTBL_BASE_IPU1                 (DRA7_PGTBL_BASE_ADDR)
+#define DRA7_PGTBL_BASE_IPU2                 (DRA7_PGTBL_BASE_IPU1 + \
+					      PAGE_TABLE_SIZE)
+#define DRA7_PGTBL_BASE_DSP1                 (DRA7_PGTBL_BASE_IPU2 + \
+					      PAGE_TABLE_SIZE)
+#define DRA7_PGTBL_BASE_DSP2                 (DRA7_PGTBL_BASE_DSP1 + \
+					      PAGE_TABLE_SIZE)
 
 /*
  * Determine if a valid ELF image exists at the given memory location.
