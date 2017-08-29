@@ -93,6 +93,7 @@
 #define CM_IPU_TIMER8_CLKCTRL        (IPU_CM_CORE_AON + 0x70)
 #define CM_L4PER2_L4_PER2_CLKCTRL    (L4PER_CM_CORE + 0x0C)
 #define CM_L4PER3_L4_PER3_CLKCTRL    (L4PER_CM_CORE + 0x14)
+#define CM_L4PER3_TIMER13_CLKCTRL    (L4PER_CM_CORE + 0xC8)
 #define CM_L4PER_I2C1_CLKCTRL        (L4PER_CM_CORE + 0xA0)
 #define CM_L4PER_I2C2_CLKCTRL        (L4PER_CM_CORE + 0xA8)
 #define CM_L4PER_I2C3_CLKCTRL        (L4PER_CM_CORE + 0xB0)
@@ -621,6 +622,7 @@ void enable_common_clocks(void)
 	__raw_writel(0x2, CM_DMA_CLKSTCTRL);
 	__raw_writel(0x2, CM_COREAON_CLKSTCTRL);
 	__raw_writel(0x2, CM_L4PER_CLKSTCTRL);
+	__raw_writel(0x2, CM_L4PER3_CLKSTCTRL);
 
 	/* Some of the timers are on the IPU clock domain */
 	__raw_writel(0x2, CM_IPU_CLKSTCTRL);
@@ -894,6 +896,7 @@ u32 dsp_start_clocks(u32 core_id, struct rproc *cfg)
 		prm_base = DSP2_PRM_BASE;
 		dsp_clkstctrl = CM_DSP2_CLKSTCTRL;
 		mmu_config = DSP2_SYS_MMU_CONFIG;
+		wdt_ctrl = CM_L4PER3_TIMER13_CLKCTRL;
 	}
 
 	/* Using TIMER_SYS_CLK as the clock source */
