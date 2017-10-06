@@ -135,12 +135,12 @@ static void omap_set_fastboot_cpu(void)
 	case DRA752_ES1_0:
 	case DRA752_ES1_1:
 	case DRA752_ES2_0:
-		cpu = "J6";
+		cpu = "DRA752";
 		break;
 	case DRA722_ES1_0:
 	case DRA722_ES2_0:
 	case DRA722_ES2_1:
-		cpu = "J6ECO";
+		cpu = "DRA722";
 		break;
 	default:
 		cpu = "unknown";
