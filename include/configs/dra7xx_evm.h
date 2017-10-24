@@ -92,10 +92,6 @@
 
 #define CONFIG_ANDROID_BOOT_IMAGE
 
-#define CONFIG_BOOTARGS_BOARD		"console=ttyS0,115200 " \
-					"androidboot.console=ttyS0 " \
-					"androidboot.hardware=jacinto6evmboard"
-
 #ifdef CONFIG_SPL_BUILD
 #undef CONFIG_CMD_BOOTD
 #ifdef CONFIG_SPL_DFU_SUPPORT
