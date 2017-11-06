@@ -1109,6 +1109,26 @@ const struct pad_conf_entry dra76x_core_padconf_array[] = {
 	{WAKEUP1, (M14 | PIN_OUTPUT)},	/* N/A.gpio1_1 */
 	{WAKEUP2, (M1 | PIN_OUTPUT)},	/* N/A.sys_nirq2 */
 	{WAKEUP3, (M1 | PIN_OUTPUT)},	/* N/A.sys_nirq1 */
+#ifdef CONFIG_DRA7XX_JAMR3
+	{XREF_CLK1, (M5 | PIN_INPUT_PULLDOWN)},	/* xref_clk1.atl_clk1 */
+	{XREF_CLK3, (M14 | PIN_INPUT)},	/* xref_clk3.gpio6_20 */
+	{MCASP1_AXR8, (M1 | PIN_OUTPUT_PULLDOWN | SLEWCONTROL)},	/* mcasp1_axr8.mcasp6_axr0 */
+	{MCASP1_AXR9, (M1 | PIN_INPUT_SLEW)},	/* mcasp1_axr9.mcasp6_axr1 */
+	{MCASP1_AXR10, (M1 | PIN_INPUT_SLEW)},	/* mcasp1_axr10.mcasp6_aclkx */
+	{MCASP1_AXR11, (M1 | PIN_INPUT_SLEW)},	/* mcasp1_axr11.mcasp6_fsx */
+	{MCASP2_ACLKX, (M0 | PIN_INPUT_PULLDOWN | VIRTUAL_MODE9)},	/* mcasp2_aclkx.mcasp2_aclkx */
+	{MCASP2_FSX, (M0 | PIN_INPUT_SLEW | VIRTUAL_MODE9)},	/* mcasp2_fsx.mcasp2_fsx */
+	{MCASP2_AXR0, (M0 | PIN_INPUT_PULLDOWN | VIRTUAL_MODE12)},	/* mcasp2_axr0.mcasp2_axr0 */
+	{MCASP2_AXR1, (M0 | PIN_INPUT_PULLDOWN | VIRTUAL_MODE12)},	/* mcasp2_axr1.mcasp2_axr1 */
+	{MCASP2_AXR2, (M0 | PIN_INPUT_SLEW | VIRTUAL_MODE9)},	/* mcasp2_axr2.mcasp2_axr2 */
+	{MCASP2_AXR3, (M0 | PIN_INPUT_SLEW | VIRTUAL_MODE9)},	/* mcasp2_axr3.mcasp2_axr3 */
+	{MCASP2_AXR4, (M0 | PIN_INPUT_PULLDOWN | VIRTUAL_MODE12)},	/* mcasp2_axr4.mcasp2_axr4 */
+	{MCASP2_AXR5, (M0 | PIN_INPUT_PULLDOWN | VIRTUAL_MODE12)},	/* mcasp2_axr5.mcasp2_axr5 */
+	{MCASP2_AXR6, (M0 | PIN_INPUT_PULLDOWN | VIRTUAL_MODE12)},	/* mcasp2_axr6.mcasp2_axr6 */
+	{MCASP2_AXR7, (M0 | PIN_INPUT_PULLDOWN | VIRTUAL_MODE12)},	/* mcasp2_axr7.mcasp2_axr7 */
+	{MCASP4_ACLKX, (M4 | PIN_INPUT_PULLUP)},	/* mcasp4_aclkx.i2c4_sda */
+	{MCASP4_FSX, (M4 | PIN_INPUT_PULLUP)},	/* mcasp4_fsx.i2c4_scl */
+#endif
 };
 
 #ifdef CONFIG_IODELAY_RECALIBRATION
