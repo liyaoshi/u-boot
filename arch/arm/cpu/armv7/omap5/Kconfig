@@ -114,6 +114,9 @@ config DRA7_GPU_OPP_OD
 config DRA7_GPU_OPP_HIGH
 	bool "OPP HIGH"
 
+config DRA7_GPU_OPP_PLUS
+	bool "OPP PLUS"
+
 endchoice
 
 endmenu
