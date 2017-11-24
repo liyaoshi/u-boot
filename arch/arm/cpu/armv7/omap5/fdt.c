@@ -295,6 +295,14 @@ u32 dra7_opp_dsp_clk_rates[NUM_OPPS][OPP_DSP_CLK_NUM] = {
 	{}, /*OPP_PLUS */
 };
 
+u32 dra76_opp_dsp_clk_rates[NUM_OPPS][OPP_DSP_CLK_NUM] = {
+	{}, /*OPP_LOW */
+	{600000000, 600000000, 400000000}, /* OPP_NOM */
+	{700000000, 700000000, 466666667}, /* OPP_OD */
+	{850000000, 850000000, 500000000}, /* OPP_HIGH */
+	{}, /*OPP_PLUS */
+};
+
 /* IVA voltage domain */
 u32 dra7_opp_iva_clk_rates[NUM_OPPS][OPP_IVA_CLK_NUM] = {
 	{}, /* OPP_LOW */
@@ -371,7 +379,14 @@ static void ft_opp_clock_fixups(void *fdt, bd_t *bd)
 
 	/* fixup DSP clocks */
 	clk_names = dra7_opp_dsp_clk_names;
-	clk_rates = dra7_opp_dsp_clk_rates[get_voltrail_opp(VOLT_EVE)];
+
+	if (is_dra76x())
+		clk_rates =
+			dra76_opp_dsp_clk_rates[get_voltrail_opp(VOLT_EVE)];
+	else
+		clk_rates =
+			dra7_opp_dsp_clk_rates[get_voltrail_opp(VOLT_EVE)];
+
 	ret = ft_fixup_clocks(fdt, clk_names, clk_rates, OPP_DSP_CLK_NUM);
 	if (ret) {
 		printf("ft_fixup_clocks failed for DSP voltage domain: %s\n",
