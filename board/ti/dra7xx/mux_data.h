@@ -1112,7 +1112,6 @@ const struct pad_conf_entry dra76x_core_padconf_array[] = {
 #ifdef CONFIG_DRA7XX_JAMR3
 	{VIN1A_CLK0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_clk0.vin1a_clk0 */
 	{VIN1A_DE0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_de0.vin1a_de0 */
-	{VIN1A_FLD0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_fld0.vin1a_fld0 */
 	{VIN1A_HSYNC0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_hsync0.vin1a_hsync0 */
 	{VIN1A_VSYNC0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_vsync0.vin1a_vsync0 */
 	{VIN1A_D0, (M0 | PIN_INPUT_PULLDOWN)},	/* vin1a_d0.vin1a_d0 */
