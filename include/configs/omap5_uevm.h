@@ -15,17 +15,68 @@
 #include <environment/ti/dfu.h>
 
 #ifndef CONFIG_SPL_BUILD
-/* Define the default GPT table for eMMC */
 #define PARTS_DEFAULT \
-	"uuid_disk=${uuid_gpt_disk};" \
-	"name=rootfs,start=2MiB,size=-,uuid=${uuid_gpt_rootfs}"
-#endif
+        /* Linux partitions */ \
+    "uuid_disk=${uuid_gpt_disk};" \
+    "name=rootfs,start=2MiB,size=-,uuid=${uuid_gpt_rootfs}\0" \
+    /* Android partitions */ \
+    "partitions_android=" \
+    "uuid_disk=${uuid_gpt_disk};" \
+    "name=xloader,start=128K,size=256K,uuid=${uuid_gpt_xloader};" \
+    "name=bootloader,size=2304K,uuid=${uuid_gpt_bootloader};" \
+    "name=environment,size=256K,uuid=${uuid_gpt_environment};" \
+    "name=misc,size=128K,uuid=${uuid_gpt_misc};" \
+    "name=reserved,size=384K,uuid=${uuid_gpt_reserved};" \
+    "name=efs,size=16M,uuid=${uuid_gpt_efs};" \
+    "name=crypto,size=16K,uuid=${uuid_gpt_crypto};" \
+    "name=recovery,size=30M,uuid=${uuid_gpt_recovery};" \
+    "name=boot,size=30M,uuid=${uuid_gpt_boot};" \
+    "name=system,size=768M,uuid=${uuid_gpt_system};" \
+    "name=vendor,size=256M,uuid=${uuid_gpt_vendor};" \
+    "name=cache,size=256M,uuid=${uuid_gpt_cache};" \
+    "name=ipu1,size=8M,uuid=${uuid_gpt_ipu1};" \
+    "name=ipu2,size=8M,uuid=${uuid_gpt_ipu2};" \
+    "name=dsp1,size=8M,uuid=${uuid_gpt_dsp1};" \
+    "name=dsp2,size=8M,uuid=${uuid_gpt_dsp2};" \
+    "name=userdata,size=-,uuid=${uuid_gpt_userdata}"
 
 #define DFUARGS \
-	"dfu_bufsiz=0x10000\0" \
-	DFU_ALT_INFO_MMC \
-	DFU_ALT_INFO_EMMC \
-	DFU_ALT_INFO_RAM
+        "dfu_bufsiz=0x10000\0" \
+    DFU_ALT_INFO_EMMC \
+    DFU_ALT_INFO_RAM 
+
+/* Fastboot */
+#define CONFIG_USB_FUNCTION_FASTBOOT
+#define CONFIG_CMD_FASTBOOT
+#define CONFIG_FASTBOOT_BUF_ADDR    CONFIG_SYS_LOAD_ADDR
+#define CONFIG_FASTBOOT_BUF_SIZE    0x2F000000
+#define CONFIG_FASTBOOT_FLASH
+#define CONFIG_FASTBOOT_FLASH_MMC_DEV   1
+#endif
+
+#ifdef CONFIG_SPL_BUILD
+#undef CONFIG_CMD_BOOTD
+#ifdef CONFIG_SPL_DFU_SUPPORT
+#define CONFIG_SPL_LOAD_FIT_ADDRESS 0x80200000
+#define CONFIG_SPL_ENV_SUPPORT
+#define CONFIG_SPL_HASH_SUPPORT
+
+#ifdef CONFIG_SPL_LOAD_FIT
+#define DFUARGS \
+        "dfu_bufsiz=0x10000\0" \
+    DFU_ALT_INFO_RAM
+#else
+#define DFU_ALT_INFO_RAM \
+        "dfu_alt_info_ram=" \
+    "kernel ram 0x807fffc0 0x4000000;" \
+    "fdt ram 0x80f80000 0x80000;" \
+    "ramdisk ram 0x81000000 0x4000000\0"
+#define DFUARGS \
+        "dfu_bufsiz=0x10000\0" \
+    DFU_ALT_INFO_RAM
+#endif
+#endif
+#endif
 
 #include <configs/ti_omap5_common.h>
 
@@ -70,7 +121,7 @@
 #define CONFIG_DFU_RAM
 
 #define CONFIG_DFU_MMC
-
+#define CONFIG_ANDROID_BOOT_IMAGE
 /* Enabled commands */
 
 /* USB Networking options */
