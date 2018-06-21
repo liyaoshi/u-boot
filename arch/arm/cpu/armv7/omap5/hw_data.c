@@ -51,17 +51,6 @@ static const struct dpll_params mpu_dpll_params_1ghz[NUM_SYS_CLKS] = {
 };
 
 static const struct dpll_params
-			core_dpll_params_2128mhz_ddr532[NUM_SYS_CLKS] = {
-	{266, 2, 2, 5, 8, 4, 62, 5, -1, 5, 7, -1},		/* 12 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 13 MHz   */
-	{443, 6, 2, 5, 8, 4, 62, 5, -1, 5, 7, -1},		/* 16.8 MHz */
-	{277, 4, 2, 5, 8, 4, 62, 5, -1, 5, 7, -1},		/* 19.2 MHz */
-	{368, 8, 2, 5, 8, 4, 62, 5, -1, 5, 7, -1},		/* 26 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
-	{277, 9, 2, 5, 8, 4, 62, 5, -1, 5, 7, -1}		/* 38.4 MHz */
-};
-
-static const struct dpll_params
 			core_dpll_params_2128mhz_ddr532_es2[NUM_SYS_CLKS] = {
 	{266, 2, 2, 5, 8, 4, 62, 63, 6, 5, 7, 6},		/* 12 MHz   */
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 13 MHz   */
@@ -70,17 +59,6 @@ static const struct dpll_params
 	{368, 8, 2, 5, 8, 4, 62, 63, 6, 5, 7, 6},		/* 26 MHz   */
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
 	{277, 9, 2, 5, 8, 4, 62, 63, 6, 5, 7, 6}		/* 38.4 MHz */
-};
-
-static const struct dpll_params
-		core_dpll_params_2128mhz_dra7xx[NUM_SYS_CLKS] = {
-	{266, 2, 2, 1, -1, 4, 62, 5, -1, 5, 4, 6},		/* 12 MHz   */
-	{266, 4, 2, 1, -1, 4, 62, 5, -1, 5, 4, 6},		/* 20 MHz   */
-	{443, 6, 2, 1, -1, 4, 62, 5, -1, 5, 4, 6},		/* 16.8 MHz */
-	{277, 4, 2, 1, -1, 4, 62, 5, -1, 5, 4, 6},		/* 19.2 MHz */
-	{368, 8, 2, 1, -1, 4, 62, 5, -1, 5, 4, 6},		/* 26 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
-	{277, 9, 2, 1, -1, 4, 62, 5, -1, 5, 4, 6},		/* 38.4 MHz */
 };
 
 static const struct dpll_params per_dpll_params_768mhz[NUM_SYS_CLKS] = {
@@ -103,26 +81,6 @@ static const struct dpll_params per_dpll_params_768mhz_es2[NUM_SYS_CLKS] = {
 	{10, 0, 4, 3, 3, 4, -1, 2, -1, -1, -1, -1}		/* 38.4 MHz */
 };
 
-static const struct dpll_params per_dpll_params_768mhz_dra7xx[NUM_SYS_CLKS] = {
-	{32, 0, 4, 1, 3, 4, 4, 2, -1, -1, -1, -1},		/* 12 MHz   */
-	{96, 4, 4, 1, 3, 4, 10, 2, -1, -1, -1, -1},		/* 20 MHz   */
-	{160, 6, 4, 1, 3, 4, 4, 2, -1, -1, -1, -1},		/* 16.8 MHz */
-	{20, 0, 4, 1, 3, 4, 4, 2, -1, -1, -1, -1},		/* 19.2 MHz */
-	{192, 12, 4, 1, 3, 4, 4, 2, -1, -1, -1, -1},		/* 26 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
-	{10, 0, 4, 1, 3, 4, 4, 2, -1, -1, -1, -1},		/* 38.4 MHz */
-};
-
-static const struct dpll_params per_dpll_params_768mhz_dra76x[NUM_SYS_CLKS] = {
-	{32, 0, 4, 1, 3, 4, 8, 2, -1, -1, -1, -1},		/* 12 MHz   */
-	{96, 4, 4, 1, 3, 4, 8, 2, -1, -1, -1, -1},		/* 20 MHz   */
-	{160, 6, 4, 1, 3, 4, 8, 2, -1, -1, -1, -1},		/* 16.8 MHz */
-	{20, 0, 4, 1, 3, 4, 8, 2, -1, -1, -1, -1},		/* 19.2 MHz */
-	{192, 12, 4, 1, 3, 4, 8, 2, -1, -1, -1, -1},		/* 26 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
-	{10, 0, 4, 1, 3, 4, 8, 2, -1, -1, -1, -1},		/* 38.4 MHz */
-};
-
 static const struct dpll_params iva_dpll_params_2330mhz[NUM_SYS_CLKS] = {
 	{1165, 11, -1, -1, 5, 6, -1, -1, -1, -1, -1, -1},	/* 12 MHz   */
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 13 MHz   */
@@ -131,16 +89,6 @@ static const struct dpll_params iva_dpll_params_2330mhz[NUM_SYS_CLKS] = {
 	{224, 4, -1, -1, 5, 6, -1, -1, -1, -1, -1, -1},		/* 26 MHz   */
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
 	{91, 2, -1, -1, 5, 6, -1, -1, -1, -1, -1, -1}		/* 38.4 MHz */
-};
-
-static const struct dpll_params iva_dpll_params_2330mhz_dra7xx[NUM_SYS_CLKS] = {
-	{1165, 11, 3, 1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 12 MHz   */
-	{233, 3, 3, 1, -1, -1, -1, -1, -1, -1, -1, -1},		/* 20 MHz */
-	{208, 2, 3, 1, -1, -1, -1, -1, -1, -1, -1, -1},		/* 16.8 MHz */
-	{182, 2, 3, 1, -1, -1, -1, -1, -1, -1, -1, -1},		/* 19.2 MHz */
-	{224, 4, 3, 1, -1, -1, -1, -1, -1, -1, -1, -1},		/* 26 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
-	{91, 2, 3, 1, -1, -1, -1, -1, -1, -1, -1, -1},		/* 38.4 MHz */
 };
 
 #ifdef CONFIG_SYS_OMAP_ABE_SYSCK
@@ -216,19 +164,6 @@ static const struct dpll_params gmac_dpll_params_2000mhz[NUM_SYS_CLKS] = {
 	{625, 23, 4, 10, 40, 8, 10, -1, -1, -1, -1, -1},	/* 38.4 MHz */
 };
 
-struct dplls omap5_dplls_es1 = {
-	.mpu = mpu_dpll_params_800mhz,
-	.core = core_dpll_params_2128mhz_ddr532,
-	.per = per_dpll_params_768mhz,
-	.iva = iva_dpll_params_2330mhz,
-#ifdef CONFIG_SYS_OMAP_ABE_SYSCK
-	.abe = abe_dpll_params_sysclk_196608khz,
-#else
-	.abe = &abe_dpll_params_32k_196608khz,
-#endif
-	.usb = usb_dpll_params_1920mhz,
-	.ddr = NULL
-};
 
 struct dplls omap5_dplls_es2 = {
 	.mpu = mpu_dpll_params_1ghz,
@@ -242,39 +177,6 @@ struct dplls omap5_dplls_es2 = {
 #endif
 	.usb = usb_dpll_params_1920mhz,
 	.ddr = NULL
-};
-
-struct dplls dra76x_dplls = {
-	.mpu = mpu_dpll_params_1ghz,
-	.core = core_dpll_params_2128mhz_dra7xx,
-	.per = per_dpll_params_768mhz_dra76x,
-	.abe = abe_dpll_params_sysclk2_361267khz,
-	.iva = iva_dpll_params_2330mhz_dra7xx,
-	.usb = usb_dpll_params_1920mhz,
-	.ddr =	ddr_dpll_params_2664mhz,
-	.gmac = gmac_dpll_params_2000mhz,
-};
-
-struct dplls dra7xx_dplls = {
-	.mpu = mpu_dpll_params_1ghz,
-	.core = core_dpll_params_2128mhz_dra7xx,
-	.per = per_dpll_params_768mhz_dra7xx,
-	.abe = abe_dpll_params_sysclk2_361267khz,
-	.iva = iva_dpll_params_2330mhz_dra7xx,
-	.usb = usb_dpll_params_1920mhz,
-	.ddr = ddr_dpll_params_2128mhz,
-	.gmac = gmac_dpll_params_2000mhz,
-};
-
-struct dplls dra72x_dplls = {
-	.mpu = mpu_dpll_params_1ghz,
-	.core = core_dpll_params_2128mhz_dra7xx,
-	.per = per_dpll_params_768mhz_dra7xx,
-	.abe = abe_dpll_params_sysclk2_361267khz,
-	.iva = iva_dpll_params_2330mhz_dra7xx,
-	.usb = usb_dpll_params_1920mhz,
-	.ddr =	ddr_dpll_params_2664mhz,
-	.gmac = gmac_dpll_params_2000mhz,
 };
 
 struct pmic_data palmas = {
@@ -338,19 +240,7 @@ struct pmic_data lp8733 = {
 	.pmic_write     = palmas_i2c_write_u8,
 };
 
-struct vcores_data omap5430_volts = {
-	.mpu.value[OPP_NOM] = VDD_MPU,
-	.mpu.addr = SMPS_REG_ADDR_12_MPU,
-	.mpu.pmic = &palmas,
 
-	.core.value[OPP_NOM] = VDD_CORE,
-	.core.addr = SMPS_REG_ADDR_8_CORE,
-	.core.pmic = &palmas,
-
-	.mm.value[OPP_NOM] = VDD_MM,
-	.mm.addr = SMPS_REG_ADDR_45_IVA,
-	.mm.pmic = &palmas,
-};
 
 struct vcores_data omap5430_volts_es2 = {
 	.mpu.value[OPP_NOM] = VDD_MPU_ES2,
@@ -559,9 +449,6 @@ void enable_usb_clocks(int index)
 			     USBPHY_CORE_CLKCTRL_OPTFCLKEN_CLK32K);
 
 		/* Enable 32 KHz clock for USB_PHY3 */
-		if (is_dra7xx())
-			setbits_le32((*prcm)->cm_coreaon_usb_phy3_core_clkctrl,
-				     USBPHY_CORE_CLKCTRL_OPTFCLKEN_CLK32K);
 	} else if (index == 1) {
 		cm_l3init_usb_otg_ss_clkctrl =
 			(*prcm)->cm_l3init_usb_otg_ss2_clkctrl;
@@ -613,10 +500,6 @@ void disable_usb_clocks(int index)
 		clrbits_le32((*prcm)->cm_coreaon_usb_phy1_core_clkctrl,
 			     USBPHY_CORE_CLKCTRL_OPTFCLKEN_CLK32K);
 
-		/* Disable 32 KHz clock for USB_PHY3 */
-		if (is_dra7xx())
-			clrbits_le32((*prcm)->cm_coreaon_usb_phy3_core_clkctrl,
-				     USBPHY_CORE_CLKCTRL_OPTFCLKEN_CLK32K);
 	} else if (index == 1) {
 		cm_l3init_usb_otg_ss_clkctrl =
 			(*prcm)->cm_l3init_usb_otg_ss2_clkctrl;
@@ -649,25 +532,6 @@ void disable_usb_clocks(int index)
 }
 #endif
 
-const struct ctrl_ioregs ioregs_omap5430 = {
-	.ctrl_ddrch = DDR_IO_I_34OHM_SR_FASTEST_WD_DQ_NO_PULL_DQS_PULL_DOWN,
-	.ctrl_lpddr2ch = DDR_IO_I_34OHM_SR_FASTEST_WD_CK_CKE_NCS_CA_PULL_DOWN,
-	.ctrl_ddrio_0 = DDR_IO_0_DDR2_DQ_INT_EN_ALL_DDR3_CA_DIS_ALL,
-	.ctrl_ddrio_1 = DDR_IO_1_DQ_OUT_EN_ALL_DQ_INT_EN_ALL,
-	.ctrl_ddrio_2 = DDR_IO_2_CA_OUT_EN_ALL_CA_INT_EN_ALL,
-};
-
-const struct ctrl_ioregs ioregs_omap5432_es1 = {
-	.ctrl_ddrch = DDR_IO_I_40OHM_SR_FAST_WD_DQ_NO_PULL_DQS_NO_PULL,
-	.ctrl_lpddr2ch = 0x0,
-	.ctrl_ddr3ch = DDR_IO_I_40OHM_SR_SLOWEST_WD_DQ_NO_PULL_DQS_NO_PULL,
-	.ctrl_ddrio_0 = DDR_IO_0_VREF_CELLS_DDR3_VALUE,
-	.ctrl_ddrio_1 = DDR_IO_1_VREF_CELLS_DDR3_VALUE,
-	.ctrl_ddrio_2 = DDR_IO_2_VREF_CELLS_DDR3_VALUE,
-	.ctrl_emif_sdram_config_ext = SDRAM_CONFIG_EXT_RD_LVL_11_SAMPLES,
-	.ctrl_emif_sdram_config_ext_final = SDRAM_CONFIG_EXT_RD_LVL_4_SAMPLES,
-};
-
 const struct ctrl_ioregs ioregs_omap5432_es2 = {
 	.ctrl_ddrch = DDR_IO_I_40OHM_SR_FAST_WD_DQ_NO_PULL_DQS_NO_PULL_ES2,
 	.ctrl_lpddr2ch = 0x0,
@@ -679,55 +543,13 @@ const struct ctrl_ioregs ioregs_omap5432_es2 = {
 	.ctrl_emif_sdram_config_ext_final = SDRAM_CONFIG_EXT_RD_LVL_4_SAMPLES,
 };
 
-const struct ctrl_ioregs ioregs_dra7xx_es1 = {
-	.ctrl_ddrch = 0x40404040,
-	.ctrl_lpddr2ch = 0x40404040,
-	.ctrl_ddr3ch = 0x80808080,
-	.ctrl_ddrio_0 = 0x00094A40,
-	.ctrl_ddrio_1 = 0x04A52000,
-	.ctrl_ddrio_2 = 0x84210000,
-	.ctrl_emif_sdram_config_ext = 0x0001C1A7,
-	.ctrl_emif_sdram_config_ext_final = 0x0001C1A7,
-	.ctrl_ddr_ctrl_ext_0 = 0xA2000000,
-};
-
-const struct ctrl_ioregs ioregs_dra72x_es1 = {
-	.ctrl_ddrch = 0x40404040,
-	.ctrl_lpddr2ch = 0x40404040,
-	.ctrl_ddr3ch = 0x60606080,
-	.ctrl_ddrio_0 = 0x00094A40,
-	.ctrl_ddrio_1 = 0x04A52000,
-	.ctrl_ddrio_2 = 0x84210000,
-	.ctrl_emif_sdram_config_ext = 0x0001C1A7,
-	.ctrl_emif_sdram_config_ext_final = 0x0001C1A7,
-	.ctrl_ddr_ctrl_ext_0 = 0xA2000000,
-};
-
-const struct ctrl_ioregs ioregs_dra72x_es2 = {
-	.ctrl_ddrch = 0x40404040,
-	.ctrl_lpddr2ch = 0x40404040,
-	.ctrl_ddr3ch = 0x60606060,
-	.ctrl_ddrio_0 = 0x00094A40,
-	.ctrl_ddrio_1 = 0x00000000,
-	.ctrl_ddrio_2 = 0x00000000,
-	.ctrl_emif_sdram_config_ext = 0x0001C1A7,
-	.ctrl_emif_sdram_config_ext_final = 0x0001C1A7,
-	.ctrl_ddr_ctrl_ext_0 = 0xA2000000,
-};
-
 void __weak hw_data_init(void)
 {
 	u32 omap_rev = omap_revision();
 
 	switch (omap_rev) {
 
-	case OMAP5430_ES1_0:
-	case OMAP5432_ES1_0:
-	*prcm = &omap5_es1_prcm;
-	*dplls_data = &omap5_dplls_es1;
-	*omap_vcores = &omap5430_volts;
-	*ctrl = &omap5_ctrl;
-	break;
+	
 
 	case OMAP5430_ES2_0:
 	case OMAP5432_ES2_0:
@@ -737,27 +559,7 @@ void __weak hw_data_init(void)
 	*ctrl = &omap5_ctrl;
 	break;
 
-	case DRA762_ES1_0:
-	*prcm = &dra7xx_prcm;
-	*dplls_data = &dra76x_dplls;
-	*ctrl = &dra7xx_ctrl;
-	break;
-
-	case DRA752_ES1_0:
-	case DRA752_ES1_1:
-	case DRA752_ES2_0:
-	*prcm = &dra7xx_prcm;
-	*dplls_data = &dra7xx_dplls;
-	*ctrl = &dra7xx_ctrl;
-	break;
-
-	case DRA722_ES1_0:
-	case DRA722_ES2_0:
-	case DRA722_ES2_1:
-	*prcm = &dra7xx_prcm;
-	*dplls_data = &dra72x_dplls;
-	*ctrl = &dra7xx_ctrl;
-	break;
+	
 
 	default:
 		printf("\n INVALID OMAP REVISION ");
@@ -769,28 +571,9 @@ void get_ioregs(const struct ctrl_ioregs **regs)
 	u32 omap_rev = omap_revision();
 
 	switch (omap_rev) {
-	case OMAP5430_ES1_0:
-	case OMAP5430_ES2_0:
-		*regs = &ioregs_omap5430;
-		break;
-	case OMAP5432_ES1_0:
-		*regs = &ioregs_omap5432_es1;
-		break;
+	
 	case OMAP5432_ES2_0:
 		*regs = &ioregs_omap5432_es2;
-		break;
-	case DRA752_ES1_0:
-	case DRA752_ES1_1:
-	case DRA752_ES2_0:
-	case DRA762_ES1_0:
-		*regs = &ioregs_dra7xx_es1;
-		break;
-	case DRA722_ES1_0:
-		*regs = &ioregs_dra72x_es1;
-		break;
-	case DRA722_ES2_0:
-	case DRA722_ES2_1:
-		*regs = &ioregs_dra72x_es2;
 		break;
 
 	default:

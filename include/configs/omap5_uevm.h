@@ -13,7 +13,7 @@
 #define __CONFIG_OMAP5_EVM_H
 
 #include <environment/ti/dfu.h>
-
+/* #define DEBUG */
 #ifndef CONFIG_SPL_BUILD
 #define PARTS_DEFAULT \
         /* Linux partitions */ \
@@ -61,6 +61,9 @@
 #define CONFIG_SPL_ENV_SUPPORT
 #define CONFIG_SPL_HASH_SUPPORT
 #endif
+#define DFUARGS \
+	"dfu_bufsiz=0x10000\0" \
+	DFU_ALT_INFO_RAM
 #endif
 
 #include <configs/ti_omap5_common.h>
