@@ -193,7 +193,7 @@ int misc_init_r(void)
 	palmas_init_settings();
 #endif
 
-	omap_die_id_usbethaddr();
+//	omap_die_id_usbethaddr();
 
 	return 0;
 }
