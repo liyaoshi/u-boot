@@ -262,6 +262,13 @@ void usb_hub_reset_devices(int port)
 }
 #endif
 
+#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_OS_BOOT)
+int spl_start_uboot(void)
+{
+	return 0;
+}
+#endif
+
 #ifdef CONFIG_USB_XHCI_OMAP
 /**
  * @brief board_usb_init - Configure EVM board specific configurations
