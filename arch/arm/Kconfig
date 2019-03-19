@@ -686,11 +686,9 @@ endchoice
 
 source "arch/arm/mach-davinci/Kconfig"
 
-source "arch/arm/mach-keystone/Kconfig"
 
 source "arch/arm/cpu/armv7/omap-common/Kconfig"
 
-source "arch/arm/cpu/armv7/rmobile/Kconfig"
 
 source "arch/arm/cpu/armv7/Kconfig"
 
