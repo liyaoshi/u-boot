@@ -60,11 +60,25 @@
 #define CONFIG_SPL_LOAD_FIT_ADDRESS 0x80200000
 #define CONFIG_SPL_ENV_SUPPORT
 #define CONFIG_SPL_HASH_SUPPORT
-#endif
+
+#ifdef CONFIG_SPL_LOAD_FIT
+#define DFUARGS \
+	"dfu_bufsiz=0x10000\0" \
+	DFU_ALT_INFO_RAM
+#else
+#define DFU_ALT_INFO_RAM \
+	"dfu_alt_info_ram=" \
+	"kernel ram 0x807fffc0 0x4000000;" \
+	"fdt ram 0x80f80000 0x80000;" \
+	"ramdisk ram 0x81000000 0x4000000\0"
 #define DFUARGS \
 	"dfu_bufsiz=0x10000\0" \
 	DFU_ALT_INFO_RAM
 #endif
+#endif
+#endif
+
+
 
 #include <configs/ti_omap5_common.h>
 
