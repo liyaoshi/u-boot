@@ -28,16 +28,7 @@ struct vcores_data const **omap_vcores =
 struct omap_sys_ctrl_regs const **ctrl =
 	(struct omap_sys_ctrl_regs const **)OMAP_SRAM_SCRATCH_SYS_CTRL;
 
-/* OPP NOM FREQUENCY for ES1.0 */
-static const struct dpll_params mpu_dpll_params_800mhz[NUM_SYS_CLKS] = {
-	{200, 2, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 12 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 13 MHz   */
-	{1000, 20, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 16.8 MHz */
-	{375, 8, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 19.2 MHz */
-	{400, 12, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 26 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
-	{375, 17, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1}	/* 38.4 MHz */
-};
+
 
 /* OPP NOM FREQUENCY for OMAP5 ES2.0, and DRA7 ES1.0 */
 static const struct dpll_params mpu_dpll_params_1ghz[NUM_SYS_CLKS] = {
@@ -61,15 +52,7 @@ static const struct dpll_params
 	{277, 9, 2, 5, 8, 4, 62, 63, 6, 5, 7, 6}		/* 38.4 MHz */
 };
 
-static const struct dpll_params per_dpll_params_768mhz[NUM_SYS_CLKS] = {
-	{32, 0, 4, 3, 6, 4, -1, 2, -1, -1, -1, -1},		/* 12 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 13 MHz   */
-	{160, 6, 4, 3, 6, 4, -1, 2, -1, -1, -1, -1},		/* 16.8 MHz */
-	{20, 0, 4, 3, 6, 4, -1, 2, -1, -1, -1, -1},		/* 19.2 MHz */
-	{192, 12, 4, 3, 6, 4, -1, 2, -1, -1, -1, -1},		/* 26 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
-	{10, 0, 4, 3, 6, 4, -1, 2, -1, -1, -1, -1}		/* 38.4 MHz */
-};
+
 
 static const struct dpll_params per_dpll_params_768mhz_es2[NUM_SYS_CLKS] = {
 	{32, 0, 4, 3, 3, 4, -1, 2, -1, -1, -1, -1},		/* 12 MHz   */
@@ -154,15 +137,7 @@ static const struct dpll_params ddr_dpll_params_2128mhz[NUM_SYS_CLKS] = {
 	{665, 23, 2, 1, 8, -1, -1, -1, -1, -1, -1, -1},		/* 38.4 MHz */
 };
 
-static const struct dpll_params gmac_dpll_params_2000mhz[NUM_SYS_CLKS] = {
-	{250, 2, 4, 10, 40, 8, 10, -1, -1, -1, -1, -1},		/* 12 MHz   */
-	{250, 4, 4, 10, 40, 8, 10, -1, -1, -1, -1, -1},		/* 20 MHz   */
-	{119, 1, 4, 10, 40, 8, 10, -1, -1, -1, -1, -1},		/* 16.8 MHz */
-	{625, 11, 4, 10, 40, 8, 10, -1, -1, -1, -1, -1},	/* 19.2 MHz */
-	{500, 12, 4, 10, 40, 8, 10, -1, -1, -1, -1, -1},	/* 26 MHz   */
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},	/* 27 MHz   */
-	{625, 23, 4, 10, 40, 8, 10, -1, -1, -1, -1, -1},	/* 38.4 MHz */
-};
+
 
 
 struct dplls omap5_dplls_es2 = {

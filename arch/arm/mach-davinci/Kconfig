@@ -30,10 +30,4 @@ endchoice
 config SYS_SOC
 	default "davinci"
 
-source "board/Barix/ipam390/Kconfig"
-source "board/davinci/da8xxevm/Kconfig"
-source "board/davinci/ea20/Kconfig"
-source "board/omicron/calimain/Kconfig"
-source "board/lego/ev3/Kconfig"
-
 endif

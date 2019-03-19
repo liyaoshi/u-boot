@@ -77,14 +77,5 @@ config QOS_PRI_GFX
 
 endchoice
 
-source "board/atmark-techno/armadillo-800eva/Kconfig"
-source "board/renesas/gose/Kconfig"
-source "board/renesas/koelsch/Kconfig"
-source "board/renesas/lager/Kconfig"
-source "board/kmc/kzm9g/Kconfig"
-source "board/renesas/alt/Kconfig"
-source "board/renesas/silk/Kconfig"
-source "board/renesas/porter/Kconfig"
-source "board/renesas/stout/Kconfig"
 
 endif

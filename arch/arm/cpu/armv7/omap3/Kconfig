@@ -121,26 +121,6 @@ endchoice
 config SYS_SOC
 	default "omap3"
 
-source "board/logicpd/am3517evm/Kconfig"
-source "board/teejet/mt_ventoux/Kconfig"
-source "board/ti/beagle/Kconfig"
-source "board/compulab/cm_t35/Kconfig"
-source "board/compulab/cm_t3517/Kconfig"
-source "board/timll/devkit8000/Kconfig"
 source "board/ti/evm/Kconfig"
-source "board/isee/igep00x0/Kconfig"
-source "board/overo/Kconfig"
-source "board/logicpd/zoom1/Kconfig"
-source "board/ti/am3517crane/Kconfig"
-source "board/pandora/Kconfig"
-source "board/8dtech/eco5pk/Kconfig"
-source "board/corscience/tricorder/Kconfig"
-source "board/htkw/mcx/Kconfig"
-source "board/logicpd/omap3som/Kconfig"
-source "board/nokia/rx51/Kconfig"
-source "board/technexion/tao3530/Kconfig"
-source "board/technexion/twister/Kconfig"
-source "board/quipos/cairo/Kconfig"
-source "board/lg/sniper/Kconfig"
 
 endif
