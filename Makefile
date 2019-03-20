@@ -628,14 +628,8 @@ libs-y += drivers/dma/
 libs-y += drivers/gpio/
 libs-y += drivers/i2c/
 libs-y += drivers/mmc/
-libs-y += drivers/mtd/
-libs-$(CONFIG_CMD_NAND) += drivers/mtd/nand/
-libs-y += drivers/mtd/onenand/
-libs-$(CONFIG_CMD_UBI) += drivers/mtd/ubi/
-libs-y += drivers/mtd/spi/
 libs-y += drivers/net/
 libs-y += drivers/net/phy/
-libs-y += drivers/pci/
 libs-y += drivers/power/ \
 	drivers/power/fuel_gauge/ \
 	drivers/power/mfd/ \
@@ -659,7 +653,6 @@ libs-y += drivers/usb/musb-new/
 libs-y += drivers/usb/phy/
 libs-y += drivers/usb/ulpi/
 libs-y += drivers/usb/common/
-libs-y += drivers/rapidio/
 libs-y += cmd/
 libs-y += common/
 libs-$(CONFIG_API) += api/

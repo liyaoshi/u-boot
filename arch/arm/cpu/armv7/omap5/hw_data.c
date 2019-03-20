@@ -133,53 +133,6 @@ struct pmic_data palmas = {
 	.gpio_en = 0,
 };
 
-/* The TPS659038 and TPS65917 are software-compatible, use common struct */
-struct pmic_data tps659038 = {
-	.base_offset = PALMAS_SMPS_BASE_VOLT_UV,
-	.step = 10000, /* 10 mV represented in uV */
-	/*
-	 * Offset codes 1-6 all give the base voltage in Palmas
-	 * Offset code 0 switches OFF the SMPS
-	 */
-	.start_code = 6,
-	.i2c_slave_addr	= TPS659038_I2C_SLAVE_ADDR,
-	.pmic_bus_init	= gpi2c_init,
-	.pmic_write	= palmas_i2c_write_u8,
-	.gpio_en = 0,
-};
-
-/* The LP87565*/
-struct pmic_data lp87565 = {
-	.base_offset = LP873X_BUCK_BASE_VOLT_UV,
-	.step = 5000, /* 5 mV represented in uV */
-	/*
-	 * Offset codes 0 - 0x13 Invalid.
-	 * Offset codes 0x14 0x17 give 10mV steps
-	 * Offset codes 0x17 through 0x9D give 5mV steps
-	 * So let us start with our operating range from .73V
-	 */
-	.start_code = 0x17,
-	.i2c_slave_addr = 0x60,
-	.pmic_bus_init  = gpi2c_init,
-	.pmic_write     = palmas_i2c_write_u8,
-};
-
-/* The LP8732 and LP8733 are software-compatible, use common struct */
-struct pmic_data lp8733 = {
-	.base_offset = LP873X_BUCK_BASE_VOLT_UV,
-	.step = 5000, /* 5 mV represented in uV */
-	/*
-	 * Offset codes 0 - 0x13 Invalid.
-	 * Offset codes 0x14 0x17 give 10mV steps
-	 * Offset codes 0x17 through 0x9D give 5mV steps
-	 * So let us start with our operating range from .73V
-	 */
-	.start_code = 0x17,
-	.i2c_slave_addr = 0x60,
-	.pmic_bus_init  = gpi2c_init,
-	.pmic_write     = palmas_i2c_write_u8,
-};
-
 
 
 struct vcores_data omap5430_volts_es2 = {

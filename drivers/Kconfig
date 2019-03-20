@@ -4,8 +4,6 @@ source "drivers/core/Kconfig"
 
 # types of drivers sorted in alphabetical order
 
-source "drivers/adc/Kconfig"
-
 source "drivers/block/Kconfig"
 
 source "drivers/clk/Kconfig"
@@ -36,13 +34,7 @@ source "drivers/misc/Kconfig"
 
 source "drivers/mmc/Kconfig"
 
-source "drivers/mtd/Kconfig"
-
 source "drivers/net/Kconfig"
-
-source "drivers/pci/Kconfig"
-
-source "drivers/pcmcia/Kconfig"
 
 source "drivers/pinctrl/Kconfig"
 
