@@ -127,8 +127,8 @@
 /* Enabled commands */
 
 /* USB Networking options */
-#define CONFIG_USB_HOST_ETHER
-#define CONFIG_USB_ETHER_SMSC95XX
+#undef CONFIG_USB_HOST_ETHER
+#undef CONFIG_USB_ETHER_SMSC95XX
 
 #define CONSOLEDEV		"ttyO2"
 
