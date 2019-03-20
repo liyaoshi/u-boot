@@ -12,8 +12,6 @@ source "drivers/cpu/Kconfig"
 
 source "drivers/dfu/Kconfig"
 
-source "drivers/dma/Kconfig"
-
 source "drivers/gpio/Kconfig"
 
 source "drivers/i2c/Kconfig"
@@ -42,7 +40,6 @@ source "drivers/timer/Kconfig"
 
 source "drivers/usb/Kconfig"
 
-source "drivers/watchdog/Kconfig"
 
 config PHYS_TO_BUS
 	bool "Custom physical to bus address mapping"
