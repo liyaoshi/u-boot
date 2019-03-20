@@ -685,20 +685,8 @@ config TARGET_THUNDERX_88XX
 endchoice
 
 source "arch/arm/mach-davinci/Kconfig"
-
-
 source "arch/arm/cpu/armv7/omap-common/Kconfig"
-
-
 source "arch/arm/cpu/armv7/Kconfig"
-
-
-
-
-source "board/ti/am43xx/Kconfig"
-source "board/ti/ti814x/Kconfig"
-source "board/ti/ti816x/Kconfig"
-
 source "arch/arm/Kconfig.debug"
 
 endmenu

@@ -121,6 +121,4 @@ endchoice
 config SYS_SOC
 	default "omap3"
 
-source "board/ti/evm/Kconfig"
-
 endif
