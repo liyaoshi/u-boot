@@ -143,7 +143,4 @@ config PIC32_PINCTRL
 
 endif
 
-source "drivers/pinctrl/nxp/Kconfig"
-source "drivers/pinctrl/uniphier/Kconfig"
-
 endmenu
