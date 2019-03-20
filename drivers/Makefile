@@ -33,7 +33,6 @@ obj-$(CONFIG_DM_DEMO) += demo/
 obj-y += block/
 obj-$(CONFIG_CPU) += cpu/
 obj-y += dfu/
-obj-y += rtc/
 obj-y += timer/
 obj-y += memory/
 obj-y += input/

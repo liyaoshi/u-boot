@@ -623,7 +623,6 @@ libs-$(CONFIG_OF_EMBED) += dts/
 libs-y += fs/
 libs-y += disk/
 libs-y += drivers/
-libs-y += drivers/dma/
 libs-y += drivers/gpio/
 libs-y += drivers/i2c/
 libs-y += drivers/mmc/
