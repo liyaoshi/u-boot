@@ -40,7 +40,6 @@
 #include <miiphy.h>
 #endif
 #include <mmc.h>
-#include <nand.h>
 #include <onenand_uboot.h>
 #include <scsi.h>
 #include <serial.h>

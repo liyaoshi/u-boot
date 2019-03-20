@@ -17,7 +17,6 @@
 #include <lmb.h>
 #include <malloc.h>
 #include <mapmem.h>
-#include <nand.h>
 #include <asm/byteorder.h>
 #include <linux/compiler.h>
 #include <linux/ctype.h>

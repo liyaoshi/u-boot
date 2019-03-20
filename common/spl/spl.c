@@ -10,7 +10,6 @@
 #include <dm.h>
 #include <spl.h>
 #include <asm/u-boot.h>
-#include <nand.h>
 #include <fat.h>
 #include <version.h>
 #include <i2c.h>
