@@ -621,15 +621,12 @@ libs-y += lib/
 libs-$(HAVE_VENDOR_COMMON_LIB) += board/$(VENDOR)/common/
 libs-$(CONFIG_OF_EMBED) += dts/
 libs-y += fs/
-libs-y += net/
 libs-y += disk/
 libs-y += drivers/
 libs-y += drivers/dma/
 libs-y += drivers/gpio/
 libs-y += drivers/i2c/
 libs-y += drivers/mmc/
-libs-y += drivers/net/
-libs-y += drivers/net/phy/
 libs-y += drivers/power/ \
 	drivers/power/fuel_gauge/ \
 	drivers/power/mfd/ \
@@ -637,9 +634,6 @@ libs-y += drivers/power/ \
 	drivers/power/battery/ \
 	drivers/power/regulator/
 libs-y += drivers/spi/
-libs-$(CONFIG_FMAN_ENET) += drivers/net/fm/
-libs-$(CONFIG_SYS_FSL_DDR) += drivers/ddr/fsl/
-libs-$(CONFIG_ALTERA_SDRAM) += drivers/ddr/altera/
 libs-y += drivers/serial/
 libs-y += drivers/usb/dwc3/
 libs-y += drivers/usb/common/

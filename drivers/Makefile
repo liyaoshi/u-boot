@@ -19,7 +19,6 @@ obj-$(CONFIG_SPL_SERIAL_SUPPORT) += serial/
 obj-$(CONFIG_SPL_SPI_SUPPORT) += spi/
 obj-$(CONFIG_SPL_POWER_SUPPORT) += power/ power/pmic/
 obj-$(CONFIG_SPL_POWER_SUPPORT) += power/regulator/
-obj-$(CONFIG_SPL_DRIVERS_MISC_SUPPORT) += misc/
 obj-$(CONFIG_SPL_DMA_SUPPORT) += dma/
 obj-$(CONFIG_SPL_MUSB_NEW_SUPPORT) += usb/musb-new/
 obj-$(CONFIG_SPL_USBETH_SUPPORT) += usb/gadget/
@@ -40,24 +39,15 @@ obj-$(CONFIG_BIOSEMU) += bios_emulator/
 obj-y += block/
 obj-$(CONFIG_BOOTCOUNT_LIMIT) += bootcount/
 obj-$(CONFIG_CPU) += cpu/
-obj-y += crypto/
-obj-y += hwmon/
-obj-y += misc/
 obj-y += dfu/
 obj-y += rtc/
 obj-y += timer/
-obj-y += tpm/
-obj-y += twserial/
 obj-y += video/
 obj-y += watchdog/
-obj-$(CONFIG_QE) += qe/
-obj-$(CONFIG_U_QE) += qe/
 obj-y += memory/
-obj-y += pwm/
 obj-y += input/
 # SOC specific infrastructure drivers.
 obj-y += soc/
 obj-$(CONFIG_REMOTEPROC) += remoteproc/
-obj-y += thermal/
 
 endif
