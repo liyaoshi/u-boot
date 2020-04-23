@@ -130,7 +130,7 @@ CONFIG_OMAP54XX=y
 CONFIG_TARGET_OMAP5_UEVM=y
 # CONFIG_TARGET_DRA7XX_EVM is not set
 # CONFIG_TARGET_AM57XX_EVM is not set
-CONFIG_ARMV7_LPAE=y
+# CONFIG_ARMV7_LPAE is not set
 
 #
 # ARM debug
@@ -143,7 +143,8 @@ CONFIG_ARMV7_LPAE=y
 CONFIG_LOCALVERSION=""
 CONFIG_LOCALVERSION_AUTO=y
 CONFIG_CC_OPTIMIZE_FOR_SIZE=y
-# CONFIG_SYS_MALLOC_F is not set
+CONFIG_SYS_MALLOC_F=y
+CONFIG_SYS_MALLOC_F_LEN=0x400
 CONFIG_EXPERT=y
 CONFIG_SYS_MALLOC_CLEAR_ON_INIT=y
 
@@ -179,8 +180,7 @@ CONFIG_SPL_LOAD_FIT=y
 # CONFIG_SPL_NAND_SUPPORT is not set
 # CONFIG_SPL_ONENAND_SUPPORT is not set
 # CONFIG_SPL_NET_SUPPORT is not set
-CONFIG_SPL_DFU_SUPPORT=y
-CONFIG_SPL_DFU_RAM=y
+# CONFIG_SPL_DFU_SUPPORT is not set
 
 #
 # Boot timing
@@ -266,11 +266,11 @@ CONFIG_CMD_MMC=y
 # CONFIG_CMD_SF is not set
 # CONFIG_CMD_SPI is not set
 CONFIG_CMD_I2C=y
-# CONFIG_CMD_USB is not set
+CONFIG_CMD_USB=y
 CONFIG_CMD_DFU=y
 # CONFIG_CMD_USB_MASS_STORAGE is not set
 # CONFIG_CMD_FPGA is not set
-CONFIG_CMD_GPIO=y
+# CONFIG_CMD_GPIO is not set
 # CONFIG_CMD_RIO is not set
 
 #
@@ -301,13 +301,15 @@ CONFIG_CMD_SOURCE=y
 # Misc commands
 #
 # CONFIG_CMD_CACHE is not set
-# CONFIG_CMD_TIME is not set
-CONFIG_CMD_MISC=y
+CONFIG_CMD_TIME=y
+# CONFIG_CMD_MISC is not set
 # CONFIG_CMD_TIMER is not set
 
 #
 # Power commands
 #
+# CONFIG_CMD_PMIC is not set
+# CONFIG_CMD_REGULATOR is not set
 
 #
 # Security commands
@@ -316,10 +318,11 @@ CONFIG_CMD_MISC=y
 #
 # Filesystem commands
 #
-# CONFIG_CMD_EXT2 is not set
-# CONFIG_CMD_EXT4 is not set
+CONFIG_CMD_EXT2=y
+CONFIG_CMD_EXT4=y
+CONFIG_CMD_EXT4_WRITE=y
 # CONFIG_CMD_FAT is not set
-# CONFIG_CMD_FS_GENERIC is not set
+CONFIG_CMD_FS_GENERIC=y
 CONFIG_SUPPORT_OF_CONTROL=y
 
 #
@@ -331,7 +334,6 @@ CONFIG_OF_SEPARATE=y
 # CONFIG_OF_EMBED is not set
 CONFIG_DEFAULT_DEVICE_TREE="omap5-uevm"
 CONFIG_OF_LIST="omap5-uevm"
-# CONFIG_NET is not set
 
 #
 # Device Drivers
@@ -352,13 +354,10 @@ CONFIG_DM_SEQ_ALIAS=y
 # CONFIG_DEVRES is not set
 CONFIG_SIMPLE_BUS=y
 CONFIG_OF_TRANSLATE=y
-# CONFIG_ADC is not set
-# CONFIG_ADC_EXYNOS is not set
-# CONFIG_ADC_SANDBOX is not set
 # CONFIG_BLK is not set
 CONFIG_DISK=y
 # CONFIG_BLOCK_CACHE is not set
-# CONFIG_DWC_AHCI is not set
+CONFIG_DWC_AHCI=y
 
 #
 # Clock
@@ -367,99 +366,47 @@ CONFIG_DISK=y
 # CONFIG_CPU is not set
 
 #
-# Hardware crypto devices
-#
-# CONFIG_FSL_CAAM is not set
-
-#
-# Demo for driver model
-#
-# CONFIG_DM_DEMO is not set
-
-#
 # DFU support
 #
 # CONFIG_DFU_TFTP is not set
 
 #
-# DMA Support
-#
-# CONFIG_DMA is not set
-# CONFIG_TI_EDMA3 is not set
-
-#
 # GPIO Support
 #
-# CONFIG_DM_GPIO is not set
+CONFIG_DM_GPIO=y
+# CONFIG_ALTERA_PIO is not set
+# CONFIG_DWAPB_GPIO is not set
 # CONFIG_ATMEL_PIO4 is not set
 # CONFIG_INTEL_BROADWELL_GPIO is not set
 # CONFIG_LPC32XX_GPIO is not set
+# CONFIG_MSM_GPIO is not set
+# CONFIG_PCF8575_GPIO is not set
+# CONFIG_ROCKCHIP_GPIO is not set
 # CONFIG_VYBRID_GPIO is not set
 
 #
 # I2C support
 #
-# CONFIG_DM_I2C is not set
+CONFIG_DM_I2C=y
 # CONFIG_DM_I2C_COMPAT is not set
+# CONFIG_DM_I2C_GPIO is not set
+# CONFIG_SYS_I2C_INTEL is not set
+# CONFIG_SYS_I2C_ROCKCHIP is not set
+# CONFIG_I2C_MUX is not set
 # CONFIG_DM_KEYBOARD is not set
 # CONFIG_CROS_EC_KEYB is not set
-
-#
-# LED Support
-#
-# CONFIG_LED is not set
 
 #
 # Memory Controller drivers
 #
 
 #
-# Multifunction device drivers
-#
-# CONFIG_MISC is not set
-# CONFIG_CROS_EC is not set
-# CONFIG_FSL_SEC_MON is not set
-# CONFIG_MXC_OCOTP is not set
-# CONFIG_PWRSEQ is not set
-# CONFIG_PCA9551_LED is not set
-# CONFIG_RESET is not set
-# CONFIG_WINBOND_W83627 is not set
-
-#
 # MMC Host controller Support
 #
-# CONFIG_DM_MMC is not set
-
-#
-# MTD Support
-#
-# CONFIG_MTD is not set
-
-#
-# NAND Device Support
-#
-# CONFIG_DM_NAND is not set
-# CONFIG_NAND_DENALI is not set
-# CONFIG_NAND_VF610_NFC is not set
-# CONFIG_NAND_PXA3XX is not set
-# CONFIG_NAND_ARASAN is not set
-
-#
-# Generic NAND options
-#
-# CONFIG_SPL_NAND_DENALI is not set
-
-#
-# SPI Flash Support
-#
-# CONFIG_SPI_FLASH is not set
-# CONFIG_DM_ETH is not set
-# CONFIG_PHYLIB is not set
-
-#
-# PCI
-#
-# CONFIG_DM_PCI is not set
+CONFIG_DM_MMC=y
+# CONFIG_MSM_SDHCI is not set
+# CONFIG_ROCKCHIP_DWMMC is not set
+# CONFIG_ZYNQ_SDHCI is not set
 
 #
 # Pin controllers
@@ -469,15 +416,29 @@ CONFIG_DISK=y
 #
 # Power
 #
-# CONFIG_DM_PMIC is not set
-# CONFIG_DM_REGULATOR is not set
-# CONFIG_DM_PWM is not set
+CONFIG_DM_PMIC=y
+CONFIG_PMIC_CHILDREN=y
+CONFIG_SPL_PMIC_CHILDREN=y
+# CONFIG_PMIC_ACT8846 is not set
+# CONFIG_DM_PMIC_PFUZE100 is not set
+# CONFIG_DM_PMIC_MAX77686 is not set
+# CONFIG_PMIC_PM8916 is not set
+# CONFIG_PMIC_RK808 is not set
+# CONFIG_PMIC_S2MPS11 is not set
+# CONFIG_DM_PMIC_SANDBOX is not set
+# CONFIG_PMIC_S5M8767 is not set
+# CONFIG_PMIC_TPS65090 is not set
+CONFIG_PMIC_PALMAS=y
+CONFIG_PMIC_LP873X=y
+CONFIG_PMIC_LP87565=y
+CONFIG_DM_REGULATOR=y
+# CONFIG_SPL_DM_REGULATOR is not set
+CONFIG_DM_REGULATOR_FIXED=y
+CONFIG_DM_REGULATOR_GPIO=y
+CONFIG_DM_REGULATOR_PALMAS=y
+CONFIG_DM_REGULATOR_LP873X=y
+CONFIG_DM_REGULATOR_LP87565=y
 # CONFIG_RAM is not set
-# CONFIG_DM_RIO is not set
-
-#
-# Remote Processor drivers
-#
 
 #
 # Real Time Clock
@@ -487,48 +448,48 @@ CONFIG_DISK=y
 #
 # Serial drivers
 #
-# CONFIG_DM_SERIAL is not set
+CONFIG_REQUIRE_SERIAL_CONSOLE=y
+CONFIG_SERIAL_PRESENT=y
+CONFIG_SPL_SERIAL_PRESENT=y
+CONFIG_DM_SERIAL=y
 # CONFIG_DEBUG_UART is not set
 # CONFIG_DEBUG_UART_SKIP_INIT is not set
+# CONFIG_ALTERA_JTAG_UART is not set
+# CONFIG_ALTERA_UART is not set
 # CONFIG_FSL_LPUART is not set
 CONFIG_SYS_NS16550=y
-
-#
-# Sound support
-#
-# CONFIG_SOUND is not set
+# CONFIG_MSM_SERIAL is not set
 
 #
 # SPI Support
 #
-# CONFIG_DM_SPI is not set
+CONFIG_DM_SPI=y
+# CONFIG_ALTERA_SPI is not set
+# CONFIG_CADENCE_QSPI is not set
+# CONFIG_DESIGNWARE_SPI is not set
+# CONFIG_EXYNOS_SPI is not set
+# CONFIG_FSL_DSPI is not set
+# CONFIG_FSL_QSPI is not set
+# CONFIG_ICH_SPI is not set
+# CONFIG_ROCKCHIP_SPI is not set
+# CONFIG_TEGRA114_SPI is not set
+# CONFIG_TEGRA20_SFLASH is not set
+# CONFIG_TEGRA20_SLINK is not set
+# CONFIG_TEGRA210_QSPI is not set
+# CONFIG_XILINX_SPI is not set
+# CONFIG_OMAP3_SPI is not set
 # CONFIG_FSL_ESPI is not set
-# CONFIG_TI_QSPI is not set
-
-#
-# SPMI support
-#
-# CONFIG_SPMI is not set
-# CONFIG_DM_THERMAL is not set
+CONFIG_TI_QSPI=y
 
 #
 # Timer Support
 #
-# CONFIG_TIMER is not set
-
-#
-# TPM support
-#
+CONFIG_TIMER=y
+# CONFIG_TIMER_EARLY is not set
+# CONFIG_ALTERA_TIMER is not set
+CONFIG_OMAP_TIMER=y
 CONFIG_USB=y
 # CONFIG_DM_USB is not set
-
-#
-# USB Host Controller Drivers
-#
-# CONFIG_USB_XHCI_HCD is not set
-# CONFIG_USB_XHCI is not set
-# CONFIG_USB_EHCI_HCD is not set
-# CONFIG_USB_EHCI is not set
 CONFIG_USB_DWC3=y
 # CONFIG_USB_DWC3_HOST is not set
 CONFIG_USB_DWC3_GADGET=y
@@ -543,12 +504,6 @@ CONFIG_USB_DWC3_OMAP=y
 #
 CONFIG_USB_DWC3_PHY_OMAP=y
 # CONFIG_USB_DWC3_PHY_SAMSUNG is not set
-
-#
-# MUSB Controller Driver
-#
-# CONFIG_USB_MUSB_HOST is not set
-# CONFIG_USB_MUSB_GADGET is not set
 
 #
 # ULPI drivers
@@ -567,24 +522,8 @@ CONFIG_USB_GADGET_VBUS_DRAW=2
 CONFIG_USB_GADGET_DUALSPEED=y
 CONFIG_USB_GADGET_DOWNLOAD=y
 CONFIG_G_DNL_MANUFACTURER="Texas Instruments"
-CONFIG_G_DNL_VENDOR_NUM=0x0403
-CONFIG_G_DNL_PRODUCT_NUM=0xbd00
-
-#
-# Graphics support
-#
-# CONFIG_DM_VIDEO is not set
-
-#
-# TrueType Fonts
-#
-# CONFIG_VIDEO_VESA is not set
-# CONFIG_VIDEO_LCD_ANX9804 is not set
-# CONFIG_VIDEO_LCD_SSD2828 is not set
-# CONFIG_VIDEO_MVEBU is not set
-# CONFIG_DISPLAY is not set
-# CONFIG_VIDEO_TEGRA20 is not set
-# CONFIG_VIDEO_BRIDGE is not set
+CONFIG_G_DNL_VENDOR_NUM=0x0451
+CONFIG_G_DNL_PRODUCT_NUM=0xd022
 # CONFIG_PHYS_TO_BUS is not set
 
 #
@@ -599,7 +538,7 @@ CONFIG_HAVE_PRIVATE_LIBGCC=y
 # CONFIG_USE_PRIVATE_LIBGCC is not set
 CONFIG_SYS_HZ=1000
 # CONFIG_USE_TINY_PRINTF is not set
-CONFIG_REGEX=y
+# CONFIG_REGEX is not set
 # CONFIG_LIB_RAND is not set
 # CONFIG_CMD_DHRYSTONE is not set
 # CONFIG_RSA is not set
